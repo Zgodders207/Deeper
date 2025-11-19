@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0D1117">
+    <title>deeper</title>
+    
+    <!-- JetBrains Mono Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ============================================
+           DESIGN SYSTEM TOKENS (8-POINT GRID)
+           ============================================ */
+        :root {
+            /* Spacing scale (8px base) */
+            --space-1: 8px;
+            --space-2: 16px;
+            --space-3: 24px;
+            --space-4: 32px;
+            --space-6: 48px;
+            --space-8: 64px;
+            --space-12: 96px;
+            
+            /* Typography scale (1.125 modular scale) */
+            --font-xs: 12px;
+            --font-sm: 14px;
+            --font-base: 16px;
+            --font-lg: 18px;
+            --font-xl: 20px;
+            --font-2xl: 24px;
+            --font-3xl: 28px;
+            --font-4xl: 32px;
+            
+            /* Colors (WCAG AAA compliant) */
+            --bg-primary: #0D1117;
+            --bg-elevated: #161B22;
+            --text-primary: #C9D1D9;
+            --text-secondary: rgba(201, 209, 217, 0.85);
+            --text-tertiary: rgba(201, 209, 217, 0.64);
+            --text-disabled: rgba(201, 209, 217, 0.38);
+            --border-primary: #30363D;
+            --border-subtle: #21262D;
+            
+            /* Font */
+            --font-mono: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', Monaco, Consolas, monospace;
+        }
+
+        /* ============================================
+           RESET & BASE
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-mono);
+            font-size: var(--font-base);
+            line-height: 1.6;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ============================================
+           LAYOUT
+           ============================================ */
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: var(--space-4) var(--space-6);
+            min-height: 100vh;
+            max-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: var(--space-2);
+        }
+
+        .header h1 {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: var(--font-lg);
+            line-height: 1.2;
+            letter-spacing: 0.05em;
+        }
+
+        .header h1 pre {
+            font-family: var(--font-mono);
+            margin: 0;
+            padding: 0;
+            display: inline-block;
+            font-size: 0.8em;
+            line-height: 0.9;
+        }
+
+        /* Three-column dashboard grid */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: var(--space-6);
+            flex: 1;
+            align-items: start;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* Sections */
+        .section {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .section > * {
+            flex-shrink: 0;
+        }
+
+        .section .reading {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-size: var(--font-sm);
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: var(--space-3);
+            text-align: left;
+        }
+
+        /* ============================================
+           STATS SECTION
+           ============================================ */
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: var(--space-1) 0;
+        }
+
+        .stat:last-of-type {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-size: var(--font-sm);
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-size: var(--font-sm);
+            font-weight: 400;
+            color: var(--text-primary);
+            letter-spacing: 0.05em;
+        }
+
+        /* Calendar */
+        .calendar {
+            margin-top: var(--space-3);
+        }
+
+        .calendar-title {
+            font-size: var(--font-xs);
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: var(--space-2);
+            text-align: center;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            transition: all 150ms ease;
+        }
+
+        .calendar-inner {
+            width: 50%;
+            height: 50%;
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            transition: all 150ms ease;
+        }
+
+        .calendar-day.completed .calendar-inner {
+            background: var(--text-primary);
+            border-color: var(--text-primary);
+        }
+
+        .calendar-day.today .calendar-inner {
+            border-color: var(--text-primary);
+            border-width: 2px;
+        }
+
+        /* ============================================
+           READING SECTION
+           ============================================ */
+        .reading {
+            text-align: center;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .completion-msg {
+            font-size: var(--font-sm);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: var(--space-2);
+            flex-shrink: 0;
+        }
+
+        .passage-ref {
+            font-size: var(--font-3xl);
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            margin: var(--space-2) 0;
+            color: var(--text-primary);
+            flex-shrink: 0;
+        }
+
+        .passage-section {
+            font-size: var(--font-sm);
+            color: var(--text-secondary);
+            letter-spacing: 0.05em;
+            margin-bottom: var(--space-3);
+            flex-shrink: 0;
+        }
+
+        .task-note {
+            font-size: var(--font-xs);
+            color: var(--text-tertiary);
+            margin-top: var(--space-2);
+            flex-shrink: 0;
+        }
+
+        /* Chapter List (for 6-chapter display) */
+        .chapter-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-2);
+            margin: var(--space-4) 0;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            flex-shrink: 0;
+        }
+
+        .chapter-item {
+            padding: var(--space-2);
+            border: 1px solid var(--border-subtle);
+            text-align: center;
+            transition: all 150ms ease;
+        }
+
+        .chapter-type {
+            font-size: var(--font-xs);
+            color: var(--text-tertiary);
+            letter-spacing: 0.1em;
+            margin-bottom: var(--space-1);
+        }
+
+        .chapter-ref {
+            font-size: var(--font-base);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Suggestions */
+        .suggestions {
+            margin-top: var(--space-4);
+            max-width: 70ch;
+            margin-left: auto;
+            margin-right: auto;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .suggestions-title {
+            font-size: var(--font-sm);
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: var(--space-2);
+            text-align: left;
+            flex-shrink: 0;
+        }
+
+        .suggestion-item {
+            font-size: var(--font-sm);
+            color: var(--text-secondary);
+            padding: var(--space-2) 0;
+            line-height: 1.5;
+            text-align: left;
+            border-bottom: 1px solid var(--border-subtle);
+            flex-shrink: 0;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Scrollbar styling */
+        .suggestions::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .suggestions::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .suggestions::-webkit-scrollbar-thumb {
+            background: var(--border-primary);
+            border-radius: 2px;
+        }
+
+        .suggestions::-webkit-scrollbar-thumb:hover {
+            background: var(--text-tertiary);
+        }
+
+        /* ============================================
+           BUTTONS & ACTIONS
+           ============================================ */
+        .btn {
+            width: 100%;
+            min-height: 52px;
+            padding: var(--space-2) var(--space-3);
+            margin-bottom: var(--space-2);
+            background: transparent;
+            border: 1px solid var(--border-primary);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: var(--font-sm);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 150ms ease;
+            text-align: center;
+            border-radius: 2px;
+        }
+
+        .btn:hover {
+            background: var(--bg-elevated);
+            border-color: var(--text-tertiary);
+        }
+
+        .btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(201, 209, 217, 0.3);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            border-color: var(--text-primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+        }
+
+        /* Scripture Quote (bottom right) */
+        .scripture-quote {
+            margin-top: var(--space-6);
+            padding: var(--space-3);
+            text-align: center;
+        }
+
+        .quote-text {
+            font-size: var(--font-sm);
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: var(--space-2);
+            font-style: italic;
+        }
+
+        .quote-ref {
+            font-size: var(--font-xs);
+            color: var(--text-tertiary);
+            letter-spacing: 0.05em;
+        }
+
+        /* ============================================
+           TASK SCREENS
+           ============================================ */
+        .task-screen {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            padding: var(--space-12) var(--space-4);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 80vh;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: var(--space-3);
+            left: var(--space-3);
+            background: transparent;
+            border: none;
+            color: var(--text-tertiary);
+            font-family: var(--font-mono);
+            font-size: var(--font-sm);
+            cursor: pointer;
+            padding: var(--space-1) var(--space-2);
+            transition: all 150ms ease;
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .back-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .task-header {
+            font-size: var(--font-sm);
+            color: var(--text-tertiary);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: var(--space-4);
+        }
+
+        .task-progress {
+            display: inline-block;
+            margin-left: var(--space-2);
+            color: var(--text-disabled);
+        }
+
+        .task-title {
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            margin: var(--space-6) 0;
+            position: relative;
+            display: inline-block;
+            line-height: 1.2;
+        }
+
+        .help-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--text-tertiary);
+            border-radius: 50%;
+            font-size: var(--font-sm);
+            color: var(--text-tertiary);
+            cursor: pointer;
+            margin-left: var(--space-2);
+            transition: all 200ms ease;
+            position: relative;
+            top: -4px;
+            min-width: 44px;
+            min-height: 44px;
+        }
+
+        .help-btn:hover {
+            background: var(--bg-elevated);
+            border-color: var(--text-primary);
+            color: var(--text-primary);
+            transform: scale(1.05);
+        }
+
+        .task-body {
+            font-size: var(--font-xl);
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin: var(--space-8) 0;
+            max-width: 60ch;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .passage-ref-large {
+            font-size: 56px;
+            font-weight: 700;
+            margin: var(--space-8) 0;
+            color: var(--text-primary);
+            line-height: 1.1;
+        }
+
+        .task-btn {
+            min-width: 240px;
+            min-height: 56px;
+            margin: var(--space-8) auto 0;
+            padding: var(--space-3) var(--space-6);
+            background: transparent;
+            border: 2px solid var(--text-primary);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: var(--font-base);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 2px;
+        }
+
+        .task-btn:hover {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            transform: scale(1.02);
+        }
+
+        .task-btn:active {
+            transform: scale(0.98);
+        }
+
+        .task-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(201, 209, 217, 0.3);
+        }
+
+        .back-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(201, 209, 217, 0.2);
+        }
+
+        .help-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(201, 209, 217, 0.3);
+        }
+
+        .completion-screen {
+            text-align: center;
+            padding: var(--space-12) var(--space-4);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+
+        .completion-title {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: var(--space-6);
+            line-height: 1.2;
+            animation: fadeInScale 300ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .completion-body {
+            font-size: var(--font-xl);
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: var(--space-8);
+            max-width: 60ch;
+            animation: fadeIn 400ms cubic-bezier(0.16, 1, 0.3, 1) 100ms both;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .completion-title,
+            .completion-body {
+                animation: none;
+            }
+        }
+
+        /* ============================================
+           CONTEXT BOX (for THEM historical context)
+           ============================================ */
+        .context-box {
+            margin: var(--space-8) auto;
+            max-width: 70ch;
+            padding: var(--space-4);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-primary);
+            text-align: left;
+            line-height: 1.6;
+        }
+
+        .context-title {
+            font-size: var(--font-base);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            color: var(--text-primary);
+            margin-bottom: var(--space-3);
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: var(--space-2);
+        }
+
+        .context-field {
+            font-size: var(--font-sm);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-2);
+            line-height: 1.6;
+        }
+
+        .context-field:last-child {
+            margin-bottom: 0;
+        }
+
+        .context-label {
+            color: var(--text-tertiary);
+            display: inline-block;
+            min-width: 90px;
+            font-weight: 500;
+        }
+
+        /* ============================================
+           VERSE SELECTION (end of cycle)
+           ============================================ */
+        .verse-selection {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--space-6) var(--space-3);
+        }
+
+        .verse-selection-title {
+            text-align: center;
+            font-size: var(--font-3xl);
+            font-weight: 700;
+            margin-bottom: var(--space-3);
+        }
+
+        .verse-selection-subtitle {
+            text-align: center;
+            font-size: var(--font-base);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-8);
+            line-height: 1.6;
+        }
+
+        .verse-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+            margin-bottom: var(--space-6);
+        }
+
+        .verse-card {
+            padding: var(--space-3);
+            border: 1px solid var(--border-primary);
+            cursor: pointer;
+            transition: all 150ms ease;
+            text-align: left;
+        }
+
+        .verse-card:hover {
+            border-color: var(--text-primary);
+            background: var(--bg-elevated);
+        }
+
+        .verse-card.selected {
+            border-color: var(--text-primary);
+            background: var(--bg-elevated);
+        }
+
+        .verse-day {
+            font-size: var(--font-xs);
+            color: var(--text-tertiary);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: var(--space-1);
+        }
+
+        .verse-text {
+            font-size: var(--font-sm);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* ============================================
+           MODALS
+           ============================================ */
+        .help-modal, .settings-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(13, 17, 23, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1050;
+            padding: var(--space-4);
+            animation: fadeIn 200ms ease-out;
+        }
+
+        .help-content, .settings-content {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
+            padding: var(--space-6);
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            border-radius: 4px;
+            animation: slideInScale 300ms cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes slideInScale {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .help-content h3, .settings-header {
+            font-size: var(--font-3xl);
+            font-weight: 700;
+            margin-bottom: var(--space-4);
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .help-content p {
+            font-size: var(--font-base);
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: var(--space-3);
+        }
+
+        .help-content ul {
+            list-style-position: inside;
+            margin: var(--space-3) 0;
+        }
+
+        .help-content li {
+            font-size: var(--font-base);
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: var(--space-2);
+        }
+
+        .help-close {
+            width: 100%;
+            margin-top: var(--space-6);
+            min-height: 48px;
+            padding: var(--space-2) var(--space-3);
+            background: transparent;
+            border: 1px solid var(--border-primary);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: var(--font-sm);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 200ms ease;
+            border-radius: 2px;
+        }
+
+        .help-close:hover {
+            background: var(--bg-elevated);
+            border-color: var(--text-tertiary);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .help-modal, .settings-modal {
+                animation: none;
+            }
+            .help-content, .settings-content {
+                animation: none;
+            }
+        }
+
+        /* Settings Modal Specific */
+        .settings-section {
+            margin-bottom: var(--space-8);
+            padding-bottom: var(--space-6);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .settings-section:last-of-type {
+            border-bottom: none;
+        }
+
+        .settings-section-title {
+            font-size: var(--font-lg);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            color: var(--text-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .settings-description {
+            font-size: var(--font-sm);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-4);
+            line-height: 1.6;
+        }
+
+        .settings-actions {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .settings-btn {
+            min-height: 48px;
+            padding: var(--space-2) var(--space-3);
+            background: transparent;
+            border: 1px solid var(--border-primary);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: var(--font-sm);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 200ms ease;
+            border-radius: 2px;
+        }
+
+        .settings-btn:hover {
+            background: var(--bg-elevated);
+            border-color: var(--text-tertiary);
+            transform: translateY(-1px);
+        }
+
+        .settings-btn:active {
+            transform: translateY(0);
+        }
+
+        .settings-btn.danger {
+            border-color: #da3633;
+            color: #da3633;
+        }
+
+        .settings-btn.danger:hover {
+            background: rgba(218, 54, 51, 0.1);
+            border-color: #ff6b6b;
+        }
+
+        .calendar-editor {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+
+        .calendar-edit-day {
+            aspect-ratio: 1;
+            min-height: 44px;
+            border: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 200ms ease;
+            font-size: var(--font-xs);
+            border-radius: 2px;
+        }
+
+        .calendar-edit-day:hover {
+            background: var(--bg-elevated);
+            border-color: var(--text-tertiary);
+            transform: scale(1.05);
+        }
+
+        .calendar-edit-day:active {
+            transform: scale(0.98);
+        }
+
+        .calendar-edit-day.completed {
+            background: var(--bg-elevated);
+            border-color: var(--text-primary);
+        }
+
+        .calendar-edit-day.today {
+            border-color: var(--text-primary);
+            border-width: 2px;
+        }
+
+        .day-number {
+            color: var(--text-tertiary);
+            font-size: var(--font-xs);
+        }
+
+        .day-checkbox {
+            width: 10px;
+            height: 10px;
+            border: 1px solid var(--border-subtle);
+            margin-top: 4px;
+            border-radius: 2px;
+            transition: all 150ms ease;
+        }
+
+        .calendar-edit-day.completed .day-checkbox {
+            background: var(--text-primary);
+            border-color: var(--text-primary);
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                gap: var(--space-4);
+            }
+            
+            .chapter-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .scripture-quote {
+                display: none;
+            }
+
+            .container {
+                max-height: none;
+                overflow: visible;
+            }
+
+            .section .reading {
+                overflow-y: visible;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: var(--space-3) var(--space-2);
+            }
+            
+            .header h1 pre {
+                font-size: 0.4em;
+            }
+            
+            .task-screen {
+                padding: var(--space-6) var(--space-3);
+                min-height: 90vh;
+            }
+            
+            .task-title {
+                font-size: 32px;
+            }
+            
+            .task-body {
+                font-size: var(--font-base);
+            }
+            
+            .passage-ref-large {
+                font-size: 36px;
+            }
+            
+            .task-btn {
+                min-width: 100%;
+                min-height: 52px;
+            }
+            
+            .completion-title {
+                font-size: 32px;
+            }
+            
+            .completion-body {
+                font-size: var(--font-base);
+            }
+            
+            .help-content, .settings-content {
+                padding: var(--space-4);
+                max-height: 90vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        // ============================================
+        // COMPREHENSIVE READING PLAN DATA (730 DAYS)
+        // ============================================
+        
+        // Generate 730-day reading plan with 1 chapter per day in 6-day pattern
+        function generateReadingPlan() {
+            const plan = [];
+            
+            // OT Books in chronological order
+            const OT_BOOKS = [
+                { name: 'Genesis', chapters: 50 },
+                { name: 'Exodus', chapters: 40 },
+                { name: 'Leviticus', chapters: 27 },
+                { name: 'Numbers', chapters: 36 },
+                { name: 'Deuteronomy', chapters: 34 },
+                { name: 'Joshua', chapters: 24 },
+                { name: 'Judges', chapters: 21 },
+                { name: 'Ruth', chapters: 4 },
+                { name: '1 Samuel', chapters: 31 },
+                { name: '2 Samuel', chapters: 24 },
+                { name: '1 Kings', chapters: 22 },
+                { name: 'Job', chapters: 42 },
+                { name: 'Ecclesiastes', chapters: 12 },
+                { name: 'Song of Solomon', chapters: 8 },
+                { name: '2 Kings', chapters: 25 },
+                { name: 'Isaiah', chapters: 66 },
+                { name: 'Jeremiah', chapters: 52 },
+                { name: 'Lamentations', chapters: 5 },
+                { name: 'Ezekiel', chapters: 48 },
+                { name: 'Daniel', chapters: 12 },
+                { name: 'Hosea', chapters: 14 },
+                { name: 'Joel', chapters: 3 },
+                { name: 'Amos', chapters: 9 },
+                { name: 'Obadiah', chapters: 1 },
+                { name: 'Jonah', chapters: 4 },
+                { name: 'Micah', chapters: 7 },
+                { name: 'Nahum', chapters: 3 },
+                { name: 'Habakkuk', chapters: 3 },
+                { name: 'Zephaniah', chapters: 3 },
+                { name: 'Haggai', chapters: 2 },
+                { name: 'Zechariah', chapters: 14 },
+                { name: 'Malachi', chapters: 4 },
+                { name: '1 Chronicles', chapters: 29 },
+                { name: '2 Chronicles', chapters: 36 },
+                { name: 'Ezra', chapters: 10 },
+                { name: 'Nehemiah', chapters: 13 },
+                { name: 'Esther', chapters: 10 }
+            ];
+            
+            const GOSPELS = [
+                { name: 'Matthew', chapters: 28 },
+                { name: 'Mark', chapters: 16 },
+                { name: 'Luke', chapters: 24 },
+                { name: 'John', chapters: 21 }
+            ];
+            
+            let otBookIdx = 0, otChapter = 1;
+            let gospelIdx = 0, gospelChapter = 1;
+            let psalmNum = 1;
+            let proverbNum = 1;
+            
+            // Pattern: OT, OT, Gospel, Gospel, Psalm, Proverb (repeat)
+            const pattern = ['OT', 'OT', 'Gospel', 'Gospel', 'Psalm', 'Proverb'];
+            
+            for (let day = 1; day <= 730; day++) {
+                const patternIdx = (day - 1) % 6;
+                const type = pattern[patternIdx];
+                const week = Math.ceil(day / 7);
+                
+                let passage = '';
+                let section = '';
+                
+                if (type === 'OT') {
+                    if (otBookIdx < OT_BOOKS.length) {
+                        const book = OT_BOOKS[otBookIdx];
+                        passage = `${book.name} ${otChapter}`;
+                        section = 'Old Testament';
+                        
+                        otChapter++;
+                        if (otChapter > book.chapters) {
+                            otBookIdx++;
+                            otChapter = 1;
+                            if (otBookIdx >= OT_BOOKS.length) {
+                                otBookIdx = 0; // Loop
+                            }
+                        }
+                    }
+                } else if (type === 'Gospel') {
+                    const gospel = GOSPELS[gospelIdx];
+                    passage = `${gospel.name} ${gospelChapter}`;
+                    section = 'Gospel';
+                    
+                    gospelChapter++;
+                    if (gospelChapter > gospel.chapters) {
+                        gospelIdx = (gospelIdx + 1) % GOSPELS.length;
+                        gospelChapter = 1;
+                    }
+                } else if (type === 'Psalm') {
+                    passage = `Psalm ${psalmNum}`;
+                    section = 'Worship';
+                    psalmNum++;
+                    if (psalmNum > 150) psalmNum = 1;
+                } else if (type === 'Proverb') {
+                    passage = `Proverbs ${proverbNum}`;
+                    section = 'Wisdom';
+                    proverbNum++;
+                    if (proverbNum > 31) proverbNum = 1;
+                }
+                
+                plan.push({ day, passage, section, week });
+            }
+            
+            return plan;
+        }
+        
+        const plan = generateReadingPlan();
+        const TOTAL = 730;
+
+        // ============================================
+        // BOOK CONTEXT DATA
+        // ============================================
+        const BOOK_CONTEXT = {
+            'Genesis': {
+                author: 'Moses',
+                date: '1445-1405 BC',
+                audience: 'Israel in wilderness generation',
+                situation: 'Newly freed nation needing to understand their origins and God\'s covenant promises',
+                purpose: 'Show God\'s sovereignty in creation and His faithful promises through patriarchs'
+            },
+            'Exodus': {
+                author: 'Moses',
+                date: '1445-1405 BC',
+                audience: 'Israel leaving Egypt',
+                situation: '400 years of slavery; miraculous deliverance through Moses',
+                purpose: 'Demonstrate God\'s power in redemption and establish covenant at Sinai'
+            },
+            'Leviticus': {
+                author: 'Moses',
+                date: '1445-1405 BC',
+                audience: 'Newly redeemed Israel at Sinai',
+                situation: 'Holy God dwelling among sinful people',
+                purpose: 'Teach holiness and provide sacrificial system for atonement'
+            },
+            'Numbers': {
+                author: 'Moses',
+                date: '1445-1405 BC',
+                audience: 'Israel during 40 years of wilderness',
+                situation: 'First generation\'s rebellion leads to 40-year delay',
+                purpose: 'Warn against unbelief and show consequences of disobedience'
+            },
+            'Deuteronomy': {
+                author: 'Moses',
+                date: '1405 BC',
+                audience: 'Second generation preparing for Canaan',
+                situation: 'New generation on plains of Moab; Moses\' final words',
+                purpose: 'Renew covenant and call to faithful obedience in the land'
+            },
+            'Matthew': {
+                author: 'Matthew (Levi)',
+                date: '50-70 AD',
+                audience: 'Jewish Christians',
+                situation: 'Need to see Jesus as fulfillment of OT prophecy',
+                purpose: 'Present Jesus as promised Messiah, King of the Jews'
+            },
+            'Mark': {
+                author: 'John Mark',
+                date: '50-60 AD',
+                audience: 'Roman Gentile Christians',
+                situation: 'Persecuted church needing encouragement',
+                purpose: 'Show Jesus as Suffering Servant who came to serve and give His life'
+            },
+            'Luke': {
+                author: 'Luke',
+                date: '60-80 AD',
+                audience: 'Greek/Gentile audience (Theophilus)',
+                situation: 'Need for orderly, historical account of Jesus',
+                purpose: 'Present Jesus as perfect Son of Man, Savior for all humanity'
+            },
+            'John': {
+                author: 'John the Apostle',
+                date: '85-95 AD',
+                audience: 'Both Jews and Gentiles, later church',
+                situation: 'Rising false teachings about Jesus\'s identity',
+                purpose: 'That you may believe Jesus is the Christ, the Son of God, and have life'
+            },
+            'Psalms': {
+                author: 'Various (David, Asaph, etc.)',
+                date: '1000-400 BC',
+                audience: 'Israel in worship',
+                situation: 'Full range of human emotions before God',
+                purpose: 'Provide songs for worship, lament, thanksgiving, and praise'
+            },
+            'Proverbs': {
+                author: 'Solomon (primarily)',
+                date: '970-700 BC',
+                audience: 'Young Israelites learning wisdom',
+                situation: 'Need for practical wisdom in daily living',
+                purpose: 'Impart wisdom, discipline, and understanding for righteous living'
+            }
+        };
+
+        // ============================================
+        // APP STATE
+        // ============================================
+        let app = {
+            day: 1,
+            completedDates: [],
+            screen: 'home', // home, task
+            step: 0, // task step counter
+            streak: 0,
+            best: 0,
+            lastDate: null
+        };
+
+        // ============================================
+        // PERSISTENCE
+        // ============================================
+        function load() {
+            const saved = localStorage.getItem('deeper-v3');
+            if (saved) {
+                app = {...app, ...JSON.parse(saved)};
+            }
+        }
+
+        function save() {
+            localStorage.setItem('deeper-v3', JSON.stringify(app));
+        }
+
+        // ============================================
+        // DATE & COMPLETION HELPERS
+        // ============================================
+        function getTodayString() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        function doneToday() {
+            return app.completedDates.includes(getTodayString());
+        }
+
+        function getReading(d) {
+            return plan.find(r => r.day === d) || plan[0];
+        }
+
+        function getMonthDays() {
+            // Get last 4 weeks (28 days) rolling calendar
+            const now = new Date();
+            const days = [];
+            
+            // Calculate start date (28 days ago)
+            for (let i = 27; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                
+                const dateStr = date.toISOString().split('T')[0];
+                const isToday = i === 0;
+                
+                days.push({
+                    day: date.getDate(),
+                    date: dateStr,
+                    completed: app.completedDates.includes(dateStr),
+                    isToday: isToday,
+                    weekday: date.getDay() // 0-6 for layout
+                });
+            }
+            
+            return days;
+        }
+
+        function calculateStreak() {
+            if (app.completedDates.length === 0) return 0;
+            
+            const sorted = [...app.completedDates].sort().reverse();
+            let streak = 0;
+            let checkDate = new Date();
+            
+            for (let date of sorted) {
+                const completedDate = new Date(date + 'T12:00:00');
+                const daysDiff = Math.floor((checkDate - completedDate) / (1000 * 60 * 60 * 24));
+                
+                if (daysDiff <= streak + 1) {
+                    streak++;
+                    checkDate = completedDate;
+                } else {
+                    break;
+                }
+            }
+            
+            return streak;
+        }
+
+        function finish() {
+            const today = getTodayString();
+            if (app.completedDates.includes(today)) {
+                return false;
+            }
+            
+            app.completedDates.push(today);
+            app.lastDate = today;
+            app.streak = calculateStreak();
+            
+            if (app.streak > app.best) {
+                app.best = app.streak;
+            }
+            
+            save();
+            return true;
+        }
+
+        // ============================================
+        // NAVIGATION
+        // ============================================
+        function home() {
+            app.screen = 'home';
+            app.step = 0;
+            draw();
+        }
+
+        function back() {
+            if (app.step > 1) {
+                app.step--;
+                draw();
+            } else {
+                home();
+            }
+        }
+
+        function start() {
+            app.screen = 'task';
+            app.step = 1;
+            draw();
+        }
+
+        function next() {
+            app.step++;
+            draw();
+        }
+
+        function done() {
+            if (finish()) {
+                app.step = 99;
+                
+                // Advance to next day
+                if (app.day < TOTAL) {
+                    app.day++;
+                } else {
+                    app.day = 1; // Loop back to Day 1
+                }
+                
+                save();
+                draw();
+            } else {
+                alert("Already completed today!");
+                home();
+            }
+        }
+
+        function reread() {
+            app.screen = 'task';
+            app.step = 2;
+            draw();
+        }
+
+        function jump() {
+            const d = prompt(`Jump to day (1-${TOTAL}):`);
+            if (d && !isNaN(d)) {
+                const n = parseInt(d);
+                if (n >= 1 && n <= TOTAL) {
+                    app.day = n;
+                    save();
+                    home();
+                }
+            }
+        }
+
+        function viewCycle() {
+            const currentCycle = Math.ceil(app.day / 6);
+            const cycleStart = ((currentCycle - 1) * 6) + 1;
+            const cycleEnd = Math.min(cycleStart + 5, TOTAL);
+            
+            let cycleInfo = `<strong>Cycle ${currentCycle}</strong> (Days ${cycleStart}-${cycleEnd}):\n\n`;
+            
+            for (let d = cycleStart; d <= cycleEnd; d++) {
+                const reading = getReading(d);
+                const dayInCycle = ((d - 1) % 6) + 1;
+                cycleInfo += `Day ${d} (${dayInCycle}/6): ${reading.passage}\n`;
+            }
+            
+            alert(cycleInfo);
+        }
+
+        // ============================================
+        // SUGGESTIONS (8 PASSAGES)
+        // ============================================
+        function getSuggestions(passage) {
+            const book = passage.split(' ')[0];
+            
+            const suggestions = {
+                'Genesis': [
+                    'John 1:1-14 - Creation & New Creation in Christ',
+                    'Hebrews 11:3 - By faith we understand creation',
+                    'Colossians 1:15-20 - Christ the Creator and Sustainer',
+                    'Romans 5:12-21 - In Adam all die, in Christ all live',
+                    '2 Corinthians 5:17 - New creation in Christ',
+                    'Revelation 21:1-5 - New heaven and new earth',
+                    'Genesis 22 → John 3:16 - God gives His only Son',
+                    'Genesis 3 → Luke 4 - Temptation: Adam fails, Jesus succeeds'
+                ],
+                'Exodus': [
+                    '1 Corinthians 10:1-13 - Israel as example for us',
+                    'Hebrews 11:23-29 - By faith Moses led Israel out',
+                    'John 6 - Jesus the Bread of Life (manna fulfilled)',
+                    '1 Peter 1:18-19 - Redeemed with precious blood of the Lamb',
+                    'John 1:29 - Behold the Lamb of God (Passover fulfilled)',
+                    'John 19:31-37 - Christ our Passover, no bones broken',
+                    'John 7:37-39 - Living water from Christ (rock fulfilled)',
+                    'Hebrews 9:11-14 - Christ enters heaven once for all'
+                ],
+                'Leviticus': [
+                    'Hebrews 9-10 - Christ\'s perfect sacrifice fulfills system',
+                    '1 Peter 1:15-16 - Be holy as God is holy',
+                    'Romans 12:1 - Present yourselves as living sacrifices',
+                    'Leviticus 16 → Hebrews 9 - Day of Atonement fulfilled',
+                    'John 1:29 - Lamb of God who takes away sin',
+                    '1 John 1:7 - Blood of Jesus cleanses from sin',
+                    'Ephesians 5:2 - Christ gave Himself as fragrant offering',
+                    'Colossians 1:22 - Reconciled through death of His body'
+                ],
+                'Isaiah': [
+                    'Isaiah 53 → Luke 22-23 - Suffering Servant fulfilled',
+                    'Isaiah 7:14 → Matthew 1 - Virgin birth prophecy',
+                    'Isaiah 9:6 → Luke 2 - Child born, Son given',
+                    'Isaiah 61:1-2 → Luke 4 - Good news to the poor',
+                    'John 12:38-41 - Isaiah saw Jesus\' glory',
+                    'Acts 8:32-35 - Philip explains Isaiah 53 to eunuch',
+                    'Romans 10:16-21 - Isaiah foretold gospel rejection',
+                    'Matthew 8:17 - He took our illnesses (Isaiah 53:4)'
+                ],
+                'Psalms': [
+                    'Psalm 22 → Matthew 27 - Crucifixion foretold',
+                    'Psalm 2 → Acts 4:25-28 - Rulers conspire against Christ',
+                    'Psalm 110 → Hebrews 1:13 - Sit at My right hand',
+                    'Psalm 23 → John 10 - The Lord is my Shepherd',
+                    'Psalm 118:22 → Matthew 21 - Stone rejected becomes cornerstone',
+                    'Hebrews 2:12 - Jesus declares God\'s name (Psalm 22:22)',
+                    'Luke 24:44 - All things written in Psalms must be fulfilled',
+                    'Acts 2:25-31 - David foresaw resurrection (Psalm 16)'
+                ],
+                'Matthew': [
+                    'Matthew 5-7 → Deuteronomy 5-8 - New Moses, New Law',
+                    'Matthew 1-2 → Exodus 1-2 - Slaughter of innocents parallel',
+                    'Matthew 4 → Deuteronomy 8 - Jesus quotes Torah in temptation',
+                    'Matthew 26-27 → Isaiah 53 - Suffering Servant fulfilled',
+                    'Genesis 22 → Matthew 3:17 - You are My beloved Son',
+                    '2 Samuel 7 → Matthew 1:1 - Son of David promise',
+                    'Jonah 1-2 → Matthew 12:40 - Sign of Jonah fulfilled',
+                    'Zechariah 9:9 → Matthew 21 - King comes on donkey'
+                ],
+                'Mark': [
+                    'Isaiah 53 → Mark 10:45 - Servant who gives His life',
+                    'Daniel 7:13 → Mark 14:62 - Son of Man coming on clouds',
+                    'Exodus 24 → Mark 14:24 - Blood of the covenant',
+                    'Zechariah 13:7 → Mark 14:27 - Strike shepherd, scatter sheep',
+                    'Psalm 22 → Mark 15 - My God, why forsaken me?',
+                    'Isaiah 50:6 → Mark 14:65 - Struck and spit upon',
+                    'Mark 1:1-3 → Isaiah 40:3 - Voice crying in wilderness',
+                    'Genesis 1 → Mark 1:1 - Beginning of good news'
+                ],
+                'Luke': [
+                    'Genesis 3:15 → Luke 1:31-35 - Seed of woman will crush serpent',
+                    'Isaiah 7:14 → Luke 1:26-38 - Virgin will conceive',
+                    '1 Samuel 2 → Luke 1:46-55 - Hannah\'s song, Mary\'s Magnificat',
+                    'Isaiah 61 → Luke 4:18-21 - Proclaim good news to poor',
+                    'Genesis 15 → Luke 1:72-73 - Remember covenant with Abraham',
+                    'Malachi 3:1 → Luke 1:76 - Messenger prepares the way',
+                    'Micah 5:2 → Luke 2:4-7 - Born in Bethlehem',
+                    'Luke 24:25-27 - Moses and Prophets speak of Christ'
+                ],
+                'John': [
+                    'Genesis 1 → John 1:1-14 - In beginning was Word',
+                    'Exodus 12 → John 19:36 - Passover Lamb, no bones broken',
+                    'Exodus 16 → John 6 - Manna vs Bread of Life',
+                    'Isaiah 53:7 → John 1:29 - Lamb led to slaughter',
+                    'Zechariah 12:10 → John 19:37 - Look on Him they pierced',
+                    'Exodus 25-40 → John 1:14 - Tabernacle vs Word dwells among us',
+                    'Numbers 21:9 → John 3:14 - Bronze serpent lifted up',
+                    'Ezekiel 34 → John 10 - God will shepherd His flock'
+                ],
+                'default': [
+                    'Luke 24:27 - Moses and Prophets speak of Christ',
+                    'John 5:39 - Scriptures testify about Jesus',
+                    'Colossians 1:15-20 - Christ supremacy in all things',
+                    '2 Timothy 3:16-17 - All Scripture is God-breathed',
+                    'Hebrews 1:1-3 - God has spoken through His Son',
+                    'Psalm 119:105 - Your word is lamp to my feet',
+                    'Romans 15:4 - Written for our instruction',
+                    '1 Peter 1:10-12 - Prophets searched what Spirit revealed'
+                ]
+            };
+            
+            return suggestions[book] || suggestions.default;
+        }
+
+        // ============================================
+        // SCRIPTURE QUOTES
+        // ============================================
+        function getScriptureQuote(day) {
+            const quotes = [
+                { text: "Your word is a lamp to my feet and a light to my path", ref: "Psalm 119:105" },
+                { text: "All Scripture is breathed out by God and profitable for teaching", ref: "2 Timothy 3:16" },
+                { text: "This Book of the Law shall not depart from your mouth", ref: "Joshua 1:8" },
+                { text: "The grass withers, the flower fades, but the word of our God will stand forever", ref: "Isaiah 40:8" },
+                { text: "Man shall not live by bread alone, but by every word that comes from the mouth of God", ref: "Matthew 4:4" },
+                { text: "Heaven and earth will pass away, but my words will not pass away", ref: "Matthew 24:35" },
+                { text: "The word of God is living and active, sharper than any two-edged sword", ref: "Hebrews 4:12" },
+                { text: "Faith comes from hearing, and hearing through the word of Christ", ref: "Romans 10:17" },
+                { text: "Blessed is the one who reads aloud the words of this prophecy", ref: "Revelation 1:3" },
+                { text: "Your words were found, and I ate them", ref: "Jeremiah 15:16" }
+            ];
+            
+            const index = (day - 1) % quotes.length;
+            return quotes[index];
+        }
+
+        // ============================================
+        // SETTINGS FUNCTIONS
+        // ============================================
+        function openSettings() {
+            const modal = document.createElement('div');
+            modal.className = 'settings-modal';
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.remove();
+            };
+            
+            const days = getMonthDays();
+            
+            modal.innerHTML = `
+                <div class="settings-content">
+                    <div class="settings-header">SETTINGS</div>
+                    
+                    <div class="settings-section">
+                        <div class="settings-section-title">Edit Calendar</div>
+                        <div class="settings-description">Toggle completion status for the last 4 weeks</div>
+                        <div class="calendar-editor">
+                            ${days.map(d => `
+                                <div class="calendar-edit-day ${d.completed ? 'completed' : ''} ${d.isToday ? 'today' : ''}" 
+                                     onclick="toggleDay('${d.date}', this)">
+                                    <div class="day-number">${d.day}</div>
+                                    <div class="day-checkbox"></div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <div class="settings-section-title">Data Management</div>
+                        <div class="settings-description">Export your progress or start fresh</div>
+                        <div class="settings-actions">
+                            <button class="settings-btn" onclick="exportData()">Export Data</button>
+                            <button class="settings-btn" onclick="importData()">Import Data</button>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <div class="settings-section-title">Reset Progress</div>
+                        <div class="settings-description">Warning: This will delete all your reading history</div>
+                        <div class="settings-actions">
+                            <button class="settings-btn danger" onclick="resetProgress()">Reset All Progress</button>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-actions">
+                        <button class="settings-btn" onclick="this.closest('.settings-modal').remove()">Close</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function toggleDay(dateStr, element) {
+            const index = app.completedDates.indexOf(dateStr);
+            
+            if (index > -1) {
+                app.completedDates.splice(index, 1);
+                element.classList.remove('completed');
+            } else {
+                app.completedDates.push(dateStr);
+                element.classList.add('completed');
+            }
+            
+            app.streak = calculateStreak();
+            if (app.streak > app.best) {
+                app.best = app.streak;
+            }
+            
+            save();
+            draw();
+        }
+
+        function exportData() {
+            const data = JSON.stringify(app, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `deeper-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            alert('Progress exported successfully!');
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const imported = JSON.parse(event.target.result);
+                        
+                        if (imported.day && imported.completedDates && Array.isArray(imported.completedDates)) {
+                            app = {...app, ...imported};
+                            app.streak = calculateStreak();
+                            save();
+                            draw();
+                            alert('Progress imported successfully!');
+                            document.querySelector('.settings-modal').remove();
+                        } else {
+                            alert('Invalid backup file format');
+                        }
+                    } catch (err) {
+                        alert('Error importing file: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset ALL progress? This cannot be undone.')) {
+                if (confirm('Really reset everything? Your reading history will be permanently deleted.')) {
+                    app = {
+                        day: 1,
+                        completedDates: [],
+                        screen: 'home',
+                        step: 0,
+                        streak: 0,
+                        best: 0,
+                        lastDate: null,
+                        journalVerses: {},
+                        memorizedVerses: []
+                    };
+                    save();
+                    draw();
+                    document.querySelector('.settings-modal').remove();
+                    alert('Progress has been reset');
+                }
+            }
+        }
+
+        // ============================================
+        // HELP MODAL
+        // ============================================
+        function showHelp(step) {
+            const helpContent = {
+                4: {
+                    title: "THEM - Who were they? What were they facing?",
+                    content: `
+                        <p>Understanding the original audience helps us see how God spoke into their specific situation.</p>
+                        <p><strong>Think about:</strong></p>
+                        <ul>
+                            <li>Who was this written to? (Israelites, early church, specific individuals?)</li>
+                            <li>What was happening in their world at this time?</li>
+                            <li>What challenges or situations were they facing?</li>
+                            <li>How would they have understood this message?</li>
+                            <li>What would this have meant in their culture and time?</li>
+                        </ul>
+                        <p>The context box shows historical details. Reflect on how God's message addressed their specific needs.</p>
+                    `
+                },
+                5: {
+                    title: "US - What does this mean for us?",
+                    content: `
+                        <p>Bridge from their context to <strong>universal truths for all believers:</strong></p>
+                        <ul>
+                            <li>What timeless principles does this passage teach?</li>
+                            <li>What does this reveal about God's character that's always true?</li>
+                            <li>How does this apply to the Church throughout all ages?</li>
+                            <li>What truths transcend culture and time period?</li>
+                            <li>How does this fit into the bigger story of redemption?</li>
+                        </ul>
+                        <p>This step moves from historical meaning to theological truth for God's people.</p>
+                    `
+                },
+                6: {
+                    title: "ME - What does this mean for me?",
+                    content: `
+                        <p>Make it <strong>personal:</strong></p>
+                        <ul>
+                            <li>How does this truth speak to my current situation?</li>
+                            <li>What is God showing me about Himself today?</li>
+                            <li>What encouragement, correction, or direction do I see?</li>
+                            <li>What does this passage reveal about who I am in Christ?</li>
+                            <li>How does this challenge or comfort me specifically?</li>
+                        </ul>
+                        <p>God's Word is living and active. Let it search your heart personally.</p>
+                    `
+                },
+                7: {
+                    title: "MY - What will I do about it?",
+                    content: `
+                        <p>Move to <strong>concrete action:</strong></p>
+                        <ul>
+                            <li>What specific action is God calling me to take?</li>
+                            <li>What attitude or belief needs to change?</li>
+                            <li>What sin do I need to confess and turn from?</li>
+                            <li>What promise do I need to trust?</li>
+                            <li>How will I live differently because of this truth?</li>
+                        </ul>
+                        <p>Be specific! Not "I should love more" but "I will apologize to my brother this afternoon." Faith without works is dead (James 2:17).</p>
+                    `
+                }
+            };
+
+            const help = helpContent[step];
+            if (!help) return;
+
+            const modal = document.createElement('div');
+            modal.className = 'help-modal';
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.remove();
+            };
+            modal.innerHTML = `
+                <div class="help-content">
+                    <h3>${help.title}</h3>
+                    ${help.content}
+                    <button class="help-close" onclick="this.closest('.help-modal').remove()">Close</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // ============================================
+        // CALENDAR RENDER
+        // ============================================
+        function renderCalendar() {
+            const days = getMonthDays();
+            return `
+                <div class="calendar">
+                    <div class="calendar-title">Last 4 Weeks</div>
+                    <div class="calendar-grid">
+                        ${days.map(d => `
+                            <div class="calendar-day ${d.completed ? 'completed' : ''} ${d.isToday ? 'today' : ''}">
+                                <div class="calendar-inner"></div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // MAIN RENDER FUNCTION
+        // ============================================
+        function draw() {
+            const el = document.getElementById('app');
+            const completedToday = doneToday();
+            
+            if (app.screen === 'home') {
+                let currentReading;
+                let showingTomorrow = false;
+                
+                if (completedToday && app.day < TOTAL) {
+                    currentReading = getReading(app.day + 1);
+                    showingTomorrow = true;
+                } else if (completedToday && app.day >= TOTAL) {
+                    currentReading = getReading(app.day);
+                } else {
+                    currentReading = getReading(app.day);
+                }
+                
+                const suggestions = getSuggestions(currentReading.passage);
+                
+                el.innerHTML = `
+                    <div class="container">
+                        <div class="header">
+                            <h1>
+<pre style="line-height: 1.1; font-size: 0.65em;">
+       __                       
+  ____/ /__  ___  ____  ___  _____
+ / __  / _ \\/ _ \\/ __ \\/ _ \\/ ___/
+/ /_/ /  __/  __/ /_/ /  __/ /    
+\\__,_/\\___/\\___/ .___/\\___/_/     
+              /_/                  
+</pre>
+                            </h1>
+                        </div>
+                        
+                        <div class="dashboard">
+                            <!-- LEFT: PROGRESS & CALENDAR -->
+                            <div class="section">
+                                <h2 class="section-title">Progress</h2>
+                                
+                                <div class="stat">
+                                    <span class="stat-label">Day</span>
+                                    <span class="stat-value">${app.day}</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Cycle</span>
+                                    <span class="stat-value">${Math.ceil(app.day / 6)}</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Day in Cycle</span>
+                                    <span class="stat-value">${((app.day - 1) % 6) + 1}/6</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Streak</span>
+                                    <span class="stat-value">${app.streak}</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Best</span>
+                                    <span class="stat-value">${app.best}</span>
+                                </div>
+                                
+                                ${renderCalendar()}
+                            </div>
+                            
+                            <!-- CENTER: READING -->
+                            <div class="section">
+                                <div class="reading">
+                                    ${completedToday ? `
+                                        <div class="completion-msg">✓ Complete</div>
+                                        ${showingTomorrow ? '<div class="completion-msg">Tomorrow</div>' : ''}
+                                    ` : ''}
+                                    
+                                    <div class="passage-ref">${currentReading.passage}</div>
+                                    <div class="passage-section">${currentReading.section}</div>
+                                    
+                                    <div class="suggestions">
+                                        <div class="suggestions-title">Explore (8 Related Passages)</div>
+                                        ${suggestions.map((s, i) => `
+                                            <div class="suggestion-item">${i + 1}. ${s}</div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- RIGHT: ACTIONS -->
+                            <div class="section">
+                                <h2 class="section-title">Actions</h2>
+                                
+                                ${!completedToday ? `
+                                    <button class="btn btn-primary" onclick="start()">Start Reading</button>
+                                ` : ''}
+                                <button class="btn" onclick="viewCycle()">View Cycle</button>
+                                <button class="btn" onclick="reread()">Re-read</button>
+                                <button class="btn" onclick="openSettings()">Settings</button>
+                                
+                                <div class="scripture-quote">
+                                    <div class="quote-text">"${getScriptureQuote(app.day).text}"</div>
+                                    <div class="quote-ref">— ${getScriptureQuote(app.day).ref}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (app.screen === 'task') {
+                const r = getReading(app.day);
+                const bookName = r.passage.split(' ')[0];
+                const context = BOOK_CONTEXT[bookName] || {};
+                
+                let content = '';
+                
+                if (app.step === 1) {
+                    // PREPARE
+                    content = `
+                        <div class="task-header">Day ${r.day} • Week ${r.week} <span class="task-progress">1/9</span></div>
+                        <div class="task-title">PREPARE</div>
+                        <div class="task-body">
+                            Find a quiet place.<br>
+                            Free from distractions.<br>
+                            Settle your mind.
+                        </div>
+                        <button class="task-btn" onclick="next()">Continue</button>
+                    `;
+                } else if (app.step === 2) {
+                    // PRAY
+                    content = `
+                        <button class="back-btn" onclick="back()">← Back</button>
+                        <div class="task-header">Day ${r.day} <span class="task-progress">2/9</span></div>
+                        <div class="task-title">PRAY</div>
+                        <div class="task-body">
+                            "Lord, help me understand Your Word.<br>
+                            Open my eyes to see wonderful things.<br>
+                            Speak to me today."
+                        </div>
+                        <button class="task-btn" onclick="next()">Continue</button>
+                    `;
+                } else if (app.step === 3) {
+                    // READ (show single chapter)
+                    content = `
+                        <button class="back-btn" onclick="back()">← Back</button>
+                        <div class="task-header">Day ${r.day} <span class="task-progress">3/9</span></div>
+                        <div class="task-title">READ</div>
+                        <div class="passage-ref-large">${r.passage}</div>
+                        <div class="task-note">Read this chapter in your Bible</div>
+                        <button class="task-btn" onclick="next()">Continue to Reflection</button>
+                    `;
+                } else if (app.step === 4) {
+                    // THEM (with historical context)
+                    content = `
+                        <button class="back-btn" onclick="back()">← Back</button>
+                        <div class="task-header">${r.passage} <span class="task-progress">4/9</span></div>
+                        <div class="task-title">
+                            THEM
+                            <span class="help-btn" onclick="showHelp(4)">?</span>
+                        </div>
+                        <div class="task-body">
+                            Who were they?<br>
+                            What were they facing?
+                        </div>
+                        
+                        <div class="context-box">
+                            <div class="context-title">Historical Context: ${bookName}</div>
+                            ${context.author ? `<div class="context-field"><span class="context-label">Author:</span> ${context.author}</div>` : ''}
+                            ${context.date ? `<div class="context-field"><span class="context-label">Date:</span> ${context.date}</div>` : ''}
+                            ${context.audience ? `<div class="context-field"><span class="context-label">Audience:</span> ${context.audience}</div>` : ''}
+                            ${context.situation ? `<div class="context-field"><span class="context-label">Situation:</span> ${context.situation}</div>` : ''}
+                            ${context.purpose ? `<div class="context-field"><span class="context-label">Purpose:</span> ${context.purpose}</div>` : ''}
+                        </div>
+                        
+                        <div class="task-note">(Write in your journal)</div>
+                        <button class="task-btn" onclick="next()">Continue</button>
+                    `;
+                } else if (app.step === 5) {
+                    // US
+                    content = `
+                        <button class="back-btn" onclick="back()">← Back</button>
+                        <div class="task-header">${r.passage} <span class="task-progress">5/9</span></div>
+                        <div class="task-title">
+                            US
+                            <span class="help-btn" onclick="showHelp(5)">?</span>
+                        </div>
+                        <div class="task-body">
+                            What does this mean for us?<br><br>
+                            What timeless truths apply to all believers?
+                        </div>
+                        <div class="task-note">(Write in your journal)</div>
+                        <button class="task-btn" onclick="next()">Continue</button>
+                    `;
+                } else if (app.step === 6) {
+                    // ME
+                    content = `
+                        <button class="back-btn" onclick="back()">← Back</button>
+                        <div class="task-header">${r.passage} <span class="task-progress">6/9</span></div>
+                        <div class="task-title">
+                            ME
+                            <span class="help-btn" onclick="showHelp(6)">?</span>
+                        </div>
+                        <div class="task-body">
+                            What does this mean for me?<br><br>
+                            How does this speak to my situation today?
+                        </div>
+                        <div class="task-note">(Write in your journal)</div>
+                        <button class="task-btn" onclick="next()">Continue</button>
+                    `;
+                } else if (app.step === 7) {
+                    // MY
+                    content = `
+                        <button class="back-btn" onclick="back()">← Back</button>
+                        <div class="task-header">${r.passage} <span class="task-progress">7/9</span></div>
+                        <div class="task-title">
+                            MY
+                            <span class="help-btn" onclick="showHelp(7)">?</span>
+                        </div>
+                        <div class="task-body">
+                            What will I do about it?<br><br>
+                            What specific action will I take?
+                        </div>
+                        <div class="task-note">(Write in your journal)</div>
+                        <button class="task-btn" onclick="next()">Continue</button>
+                    `;
+                } else if (app.step === 8) {
+                    // VERSE (Record memorable verse)
+                    content = `
+                        <button class="back-btn" onclick="back()">← Back</button>
+                        <div class="task-header">Day ${r.day} <span class="task-progress">8/9</span></div>
+                        <div class="task-title">VERSE</div>
+                        <div class="task-body">
+                            Write down one memorable verse<br>
+                            from today's reading.
+                        </div>
+                        <div class="task-note">(Write verse reference and text in your journal)</div>
+                        <button class="task-btn" onclick="next()">Continue</button>
+                    `;
+                } else if (app.step === 9) {
+                    // PRAYER (NEW: Prayer and application)
+                    content = `
+                        <button class="back-btn" onclick="back()">← Back</button>
+                        <div class="task-header">Day ${r.day} <span class="task-progress">9/9</span></div>
+                        <div class="task-title">PRAYER</div>
+                        <div class="task-body">
+                            Pray about what you've learned.<br><br>
+                            Ask God to help you live out this truth.<br>
+                            Commit to following through.
+                        </div>
+                        <div class="task-note">(Write your prayer in your journal)</div>
+                        <button class="task-btn" onclick="done()">Complete Day</button>
+                    `;
+                } else if (app.step === 99) {
+                    // COMPLETION
+                    content = `
+                        <div class="completion-title">Day ${r.day} Complete</div>
+                        <div class="completion-body">
+                            Your reading is recorded.<br>
+                            Continue tomorrow.
+                        </div>
+                        <button class="task-btn" onclick="home()">Back to Dashboard</button>
+                    `;
+                }
+                
+                el.innerHTML = `
+                    <div class="container">
+                        ${app.step === 99 ? `
+                            <div class="completion-screen">
+                                ${content}
+                            </div>
+                        ` : `
+                            <div class="task-screen">
+                                ${content}
+                            </div>
+                        `}
+                    </div>
+                `;
+            }
+        }
+
+        // ============================================
+        // INITIALIZE
+        // ============================================
+        window.onload = function() {
+            load();
+            draw();
+        };
+    </script>
+</body>
+</html>
