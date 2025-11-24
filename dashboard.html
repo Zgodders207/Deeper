@@ -184,24 +184,25 @@
             border-color: var(--color-warning);
         }
 
-        /* Sleep Graph */
-        .sleep-section {
+        /* To-Do List */
+        .todo-section {
             margin-top: auto;
             padding-top: var(--space-4);
             flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
         }
 
-        .sleep-input {
+        .todo-input {
             display: flex;
             gap: var(--space-2);
             margin-bottom: var(--space-3);
-            font-size: var(--font-xs);
-            align-items: center;
         }
 
-        .sleep-input input {
-            width: 50px;
-            padding: 4px 6px;
+        .todo-input input {
+            flex: 1;
+            padding: 6px 8px;
             background: transparent;
             border: none;
             border-bottom: 1px solid var(--border-subtle);
@@ -209,29 +210,18 @@
             font-family: var(--font-mono);
             font-size: var(--font-xs);
             transition: all 150ms ease;
-            text-align: center;
         }
 
-        .sleep-input input:focus {
+        .todo-input input:focus {
             outline: none;
             border-bottom-color: var(--text-primary);
         }
 
-        .sleep-input input::placeholder {
+        .todo-input input::placeholder {
             color: var(--text-disabled);
         }
 
-        .sleep-input input[type=number]::-webkit-inner-spin-button,
-        .sleep-input input[type=number]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        .sleep-input input[type=number] {
-            -moz-appearance: textfield;
-        }
-
-        .sleep-input button {
+        .todo-input button {
             padding: 4px 12px;
             background: transparent;
             border: 1px solid var(--border-primary);
@@ -240,23 +230,84 @@
             font-size: var(--font-xs);
             cursor: pointer;
             transition: all 150ms ease;
-            pointer-events: auto;
-            position: relative;
-            z-index: 1;
         }
 
-        .sleep-input button:hover {
+        .todo-input button:hover {
             color: var(--text-primary);
             border-color: var(--text-primary);
             background: rgba(201, 209, 217, 0.03);
         }
 
-        .sleep-graph {
-            height: 120px;
-            position: relative;
-            border-left: 1px solid var(--border-subtle);
-            border-bottom: 1px solid var(--border-subtle);
-            pointer-events: none;
+        .todo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: 6px 8px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            font-size: var(--font-xs);
+            transition: all 150ms ease;
+        }
+
+        .todo-item:hover {
+            border-color: var(--border-primary);
+        }
+
+        .todo-checkbox {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+            background: transparent;
+            border: 1px solid var(--border-primary);
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+
+        .todo-checkbox:hover {
+            border-color: var(--text-primary);
+        }
+
+        .todo-checkbox.completed {
+            background: var(--text-primary);
+            border-color: var(--text-primary);
+        }
+
+        .todo-text {
+            flex: 1;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            color: var(--text-disabled);
+        }
+
+        .todo-delete {
+            flex-shrink: 0;
+            background: transparent;
+            border: none;
+            color: var(--text-disabled);
+            font-family: var(--font-mono);
+            font-size: var(--font-xs);
+            cursor: pointer;
+            padding: 2px 6px;
+            transition: all 150ms ease;
+        }
+
+        .todo-delete:hover {
+            color: var(--text-primary);
         }
 
         @media (min-width: 1920px) {
@@ -274,10 +325,6 @@
 
             .stat-value {
                 font-size: var(--font-xl);
-            }
-
-            .sleep-graph {
-                max-height: 200px;
             }
         }
 
@@ -311,9 +358,9 @@
     <script>
         let appData = Storage.load();
 
-        // Initialize sleep data if not exists
-        if (!appData.sleepData) {
-            appData.sleepData = [];
+        // Initialize todos if not exists
+        if (!appData.todos) {
+            appData.todos = [];
         }
 
         function checkAccess() {
@@ -370,17 +417,6 @@
             return days;
         }
 
-        function getLastNDaysSimple(n) {
-            const days = [];
-            const today = new Date();
-            for (let i = n - 1; i >= 0; i--) {
-                const date = new Date(today);
-                date.setDate(date.getDate() - i);
-                days.push(date.toISOString().split('T')[0]);
-            }
-            return days;
-        }
-
         function toggleHabit(habitId, date) {
             const habit = appData.habits.find(h => h.id === habitId);
             if (!habit) return;
@@ -397,83 +433,40 @@
             render();
         }
 
-        function logSleep() {
-            const hoursInput = document.getElementById('sleep-hours');
-            const qualityInput = document.getElementById('sleep-quality');
+        function addTodo() {
+            const input = document.getElementById('todo-input');
+            if (!input) return;
 
-            if (!hoursInput || !qualityInput) {
-                alert('Error: Sleep inputs not found');
-                return;
-            }
+            const text = input.value.trim();
+            if (!text) return;
 
-            const hours = parseFloat(hoursInput.value);
-            const quality = parseInt(qualityInput.value);
+            const todo = {
+                id: Date.now(),
+                text: text,
+                completed: false,
+                createdAt: new Date().toISOString()
+            };
 
-            // Validate inputs
-            if (!hoursInput.value || isNaN(hours) || hours <= 0 || hours > 12) {
-                alert('Please enter valid sleep hours (0.5-12)');
-                return;
-            }
-
-            if (!qualityInput.value || isNaN(quality) || quality < 1 || quality > 10) {
-                alert('Please enter valid quality (1-10)');
-                return;
-            }
-
-            const today = Storage.getTodayString();
-            const existing = appData.sleepData.findIndex(s => s.date === today);
-
-            if (existing > -1) {
-                appData.sleepData[existing] = { date: today, hours, quality };
-            } else {
-                appData.sleepData.push({ date: today, hours, quality });
-            }
-
-            // Keep only last 90 days
-            appData.sleepData.sort((a, b) => a.date.localeCompare(b.date));
-            if (appData.sleepData.length > 90) {
-                appData.sleepData = appData.sleepData.slice(-90);
-            }
-
+            appData.todos.push(todo);
             Storage.save(appData);
 
-            // Update the graph and re-render to show the new value
+            input.value = '';
             render();
         }
 
-        function renderSleepGraph(numDays) {
-            const days = getLastNDaysSimple(numDays);
-            const sleepMap = {};
-            appData.sleepData.forEach(s => {
-                sleepMap[s.date] = s;
-            });
+        function toggleTodo(id) {
+            const todo = appData.todos.find(t => t.id === id);
+            if (!todo) return;
 
-            const maxHours = 10;
-            const points = days.map((date, i) => {
-                const sleep = sleepMap[date];
-                if (!sleep) return null;
-                const x = (i / (numDays - 1)) * 100;
-                const yHours = (sleep.hours / maxHours) * 100;
-                const yQuality = (sleep.quality / 10) * 100;
-                return { x, yHours, yQuality, sleep };
-            }).filter(p => p);
+            todo.completed = !todo.completed;
+            Storage.save(appData);
+            render();
+        }
 
-            if (points.length === 0) return '<svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></svg>';
-
-            let hoursPath = 'M';
-            let qualityPath = 'M';
-
-            points.forEach((p, i) => {
-                hoursPath += `${i === 0 ? '' : ' L'}${p.x} ${100 - p.yHours}`;
-                qualityPath += `${i === 0 ? '' : ' L'}${p.x} ${100 - p.yQuality}`;
-            });
-
-            return `
-                <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
-                    <path d="${hoursPath}" stroke="var(--text-primary)" stroke-width="2" fill="none" />
-                    <path d="${qualityPath}" stroke="var(--text-tertiary)" stroke-width="1.5" fill="none" stroke-dasharray="3,3" />
-                </svg>
-            `;
+        function deleteTodo(id) {
+            appData.todos = appData.todos.filter(t => t.id !== id);
+            Storage.save(appData);
+            render();
         }
 
         function openBibleStudy() {
@@ -604,8 +597,6 @@
             const mode = Routines.getCurrentMode();
             const isEvening = mode === 'evening-required';
 
-            const todaySleep = appData.sleepData.find(s => s.date === today);
-
             app.innerHTML = `
                 <div class="dashboard-container">
                     <div class="header">
@@ -663,16 +654,21 @@
                                 `).join('')}
                             </div>
 
-                            <!-- Sleep Tracker -->
-                            <div class="sleep-section">
-                                <h2 class="section-title">Sleep (${numDays}d)</h2>
-                                <div class="sleep-input">
-                                    <input type="number" id="sleep-hours" placeholder="hrs" step="0.5" min="0" max="12" value="${todaySleep ? todaySleep.hours : ''}">
-                                    <input type="number" id="sleep-quality" placeholder="q 1-10" min="1" max="10" value="${todaySleep ? todaySleep.quality : ''}">
-                                    <button onclick="logSleep()">Log</button>
+                            <!-- To-Do List -->
+                            <div class="todo-section">
+                                <h2 class="section-title">To-Do</h2>
+                                <div class="todo-input">
+                                    <input type="text" id="todo-input" placeholder="Add a task..." onkeypress="if(event.key==='Enter')addTodo()">
+                                    <button onclick="addTodo()">Add</button>
                                 </div>
-                                <div class="sleep-graph">
-                                    ${renderSleepGraph(numDays)}
+                                <div class="todo-list">
+                                    ${appData.todos.map(todo => `
+                                        <div class="todo-item ${todo.completed ? 'completed' : ''}">
+                                            <div class="todo-checkbox ${todo.completed ? 'completed' : ''}" onclick="toggleTodo(${todo.id})"></div>
+                                            <div class="todo-text">${todo.text}</div>
+                                            <button class="todo-delete" onclick="deleteTodo(${todo.id})">×</button>
+                                        </div>
+                                    `).join('')}
                                 </div>
                             </div>
                         </div>

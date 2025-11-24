@@ -60,8 +60,8 @@ const Storage = {
             // Journal entries
             journalEntries: [],
 
-            // Sleep tracking
-            sleepData: [],
+            // To-do list
+            todos: [],
 
             // Bible study data (from existing app)
             bible: {
