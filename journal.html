@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0D1117">
+    <title>Journal - deeper</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
+</head>
+<body>
+    <div id="app"></div>
+
+    <script src="scripts/storage.js"></script>
+    <script>
+        let appData = Storage.load();
+
+        function goBack() {
+            window.location.href = 'dashboard.html';
+        }
+
+        function viewEntry(entryId) {
+            const entry = appData.journalEntries.find(e => e.id === entryId);
+            if (!entry) return;
+
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">Journal Entry</div>
+                    <div style="margin-bottom: var(--space-2); font-size: var(--font-sm); color: var(--text-tertiary);">
+                        ${new Date(entry.timestamp).toLocaleString()}
+                    </div>
+
+                    ${entry.goodThings && entry.goodThings.length > 0 ? `
+                        <div style="margin-bottom: var(--space-4);">
+                            <h3 style="font-size: var(--font-base); margin-bottom: var(--space-2); color: var(--text-secondary);">
+                                3 Good Things
+                            </h3>
+                            <ul style="list-style-position: inside; color: var(--text-primary);">
+                                ${entry.goodThings.map(thing => `<li style="margin-bottom: var(--space-1);">${thing}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+
+                    ${entry.lessons && entry.lessons.length > 0 ? `
+                        <div style="margin-bottom: var(--space-4);">
+                            <h3 style="font-size: var(--font-base); margin-bottom: var(--space-2); color: var(--text-secondary);">
+                                3 Lessons
+                            </h3>
+                            <ul style="list-style-position: inside; color: var(--text-primary);">
+                                ${entry.lessons.map(lesson => `<li style="margin-bottom: var(--space-1);">${lesson}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+
+                    ${entry.improvements && entry.improvements.length > 0 ? `
+                        <div style="margin-bottom: var(--space-4);">
+                            <h3 style="font-size: var(--font-base); margin-bottom: var(--space-2); color: var(--text-secondary);">
+                                Improvements for Tomorrow
+                            </h3>
+                            <ul style="list-style-position: inside; color: var(--text-primary);">
+                                ${entry.improvements.map(imp => `<li style="margin-bottom: var(--space-1);">${imp}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+
+                    ${entry.notes ? `
+                        <div style="margin-bottom: var(--space-4);">
+                            <h3 style="font-size: var(--font-base); margin-bottom: var(--space-2); color: var(--text-secondary);">
+                                Notes
+                            </h3>
+                            <p style="color: var(--text-primary); white-space: pre-wrap;">${entry.notes}</p>
+                        </div>
+                    ` : ''}
+
+                    <div class="modal-actions">
+                        <button class="btn" onclick="closeModal()">Close</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function closeModal() {
+            const modal = document.querySelector('.modal');
+            if (modal) modal.remove();
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            const entries = [...appData.journalEntries].reverse(); // Most recent first
+
+            app.innerHTML = `
+                <div class="container dashboard-container">
+                    <div class="dashboard-header">
+                        <button onclick="goBack()" class="btn" style="width: auto; margin-bottom: var(--space-3);">
+                            ← Back to Dashboard
+                        </button>
+                        <h1 class="dashboard-title">Journal Entries</h1>
+                        <div class="dashboard-greeting">${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}</div>
+                    </div>
+
+                    ${entries.length === 0 ? `
+                        <div class="dashboard-section" style="text-align: center; padding: var(--space-8);">
+                            <div style="font-size: var(--font-2xl); color: var(--text-tertiary); margin-bottom: var(--space-2);">
+                                No journal entries yet
+                            </div>
+                            <div style="font-size: var(--font-base); color: var(--text-secondary);">
+                                Complete your evening routine to create journal entries
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="dashboard-section">
+                            <div class="journal-list">
+                                ${entries.map(entry => `
+                                    <div class="journal-item" onclick="viewEntry(${entry.id})">
+                                        <div class="journal-date">
+                                            ${new Date(entry.date).toLocaleDateString('en-US', {
+                                                weekday: 'short',
+                                                year: 'numeric',
+                                                month: 'short',
+                                                day: 'numeric'
+                                            })}
+                                        </div>
+                                        <div class="journal-preview">
+                                            ${entry.goodThings && entry.goodThings.length > 0 ?
+                                                entry.goodThings[0].substring(0, 80) + (entry.goodThings[0].length > 80 ? '...' : '') :
+                                                'View entry'}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        window.onload = render;
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+
+    <style>
+        .journal-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .journal-item {
+            padding: var(--space-3);
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 200ms ease;
+        }
+
+        .journal-item:hover {
+            border-color: var(--border-primary);
+            transform: translateY(-2px);
+        }
+
+        .journal-date {
+            font-size: var(--font-sm);
+            color: var(--text-tertiary);
+            margin-bottom: var(--space-1);
+            letter-spacing: 0.05em;
+        }
+
+        .journal-preview {
+            font-size: var(--font-base);
+            color: var(--text-primary);
+        }
+    </style>
+</body>
+</html>

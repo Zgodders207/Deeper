@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0D1117">
+    <title>Morning Routine - deeper</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/step.css">
+</head>
+<body>
+    <div id="app"></div>
+
+    <script src="scripts/storage.js"></script>
+    <script src="scripts/routines.js"></script>
+    <script>
+        let appData = Storage.load();
+        let currentStep = 0;
+        let timerInterval = null;
+
+        // Check if we should be on this page
+        function checkAccess() {
+            const mode = Routines.getCurrentMode();
+            if (mode === 'pre-morning') {
+                window.location.href = 'index.html';
+                return false;
+            }
+            if (mode === 'daytime') {
+                window.location.href = 'dashboard.html';
+                return false;
+            }
+            if (mode === 'evening-required' || mode === 'evening-complete') {
+                window.location.href = 'evening-routine.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Go back to previous page
+        function goBack() {
+            window.history.back();
+        }
+
+        // Get current step from items
+        function getCurrentStep() {
+            const items = appData.routines.morning.items;
+            for (let i = 0; i < items.length; i++) {
+                if (!items[i].completed) {
+                    return i;
+                }
+            }
+            return items.length; // All complete
+        }
+
+        // Auto-check wake up time
+        function autoCheckWakeUp() {
+            const wakeItem = appData.routines.morning.items.find(i => i.id === 'wake');
+            if (wakeItem && !wakeItem.completed) {
+                const now = new Date();
+                const [hours, minutes] = appData.preferences.morningTime.split(':').map(Number);
+
+                if (now.getHours() > hours || (now.getHours() === hours && now.getMinutes() >= minutes)) {
+                    wakeItem.completed = true;
+                    Storage.save(appData);
+                }
+            }
+        }
+
+        // Complete current step
+        function completeStep() {
+            const item = appData.routines.morning.items[currentStep];
+            if (!item) return;
+
+            item.completed = true;
+            Storage.save(appData);
+
+            // Move to next step
+            nextStep();
+        }
+
+        // Next step
+        function nextStep() {
+            currentStep = getCurrentStep();
+
+            if (currentStep >= appData.routines.morning.items.length) {
+                // All complete - finalize routine
+                Routines.finalizeRoutine(appData, 'morning');
+                Storage.save(appData);
+                window.location.href = 'dashboard.html';
+            } else {
+                render();
+            }
+        }
+
+        // Start timer
+        function startTimer(duration) {
+            let remaining = duration;
+            const display = document.getElementById('timer-display');
+            const startBtn = document.getElementById('start-btn');
+            const completeBtn = document.getElementById('complete-btn');
+
+            startBtn.style.display = 'none';
+
+            timerInterval = setInterval(() => {
+                remaining--;
+                display.textContent = Routines.formatTimer(remaining);
+
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+                    // Play simple beep
+                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZRQ0PVqzn77BdGAg+ltzy0HwrBSl+y/LaizsIGGS57OihUhELTKXh8bllHAU2jtbz0n8uBiZ7xvDajDwIFl627OaeSBAOTqLg8bJgHAU4kdfy0IAuBCd7xvDajTwHFl+17+aeRxEOT6Lf8bJgHQU5kdXy0IEuBCd7xfDajTwIFl627uaeSBAOTqLf8bJgHAU5kdXy0IAuBCd7xfDajTwIFl627uaeSBAOTqLf8bJgHQU4kdby0IAuBCd7xfDajTwIFl627OaeSREOTqLf8bJgHAU4kdXy0IEuBCd7xfDbjTwHFl627OaeSREOTqLf8bJgHAU4kdby0IAuBCd7xfDajTwIFl627uaeSBAOTqLf8bJgHAU4kdXy0IEuBCd7xfDbjTwHFl627OaeSREOT6Lf8bJgGwU4kdXy0IEuBCd7xfDbjTwHFV+17OaeSREOT6Lf8bJgGwU4kdXy0IEuBCd7xfDbjTwHFV+17OaeSREOT6Lf8bJgHAU4kdXy0IEuBCd7xfDajTwIFl627OaeSRAOTqLf8bJgHAU4kdXy0IAuBCd7xvDajTwIFl627OaeSRAOTqLf8bJgHAU4kdXy0IAuBCd7xfDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IAuBCd7xvDajTwIFl627OaeSBAOTqLf8bJgHAU4kdXy0IAuBCd7xvDajTwIFl627OaeSBAOTqLf8bJgHAU4kdXy0IAuBCd7xfDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IAuBCd7xvDajTwIFl627OaeSBAOTqLf8bJgHAU4kdXy0IEuBCd7xvDajTwIFl627OaeSBAOTqLf8bJgGwU4kdXy0IEuBCd7xvDajTwIFl627OaeSBAOTqLf8bJgGwU4kdby0IEuBCd7xvDajTwHFl627OaeSBAOT6Lf8bJgGwU4kdXy0IEuBCd7xvDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xvDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xvDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xvDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xvDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xvDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xvDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xfDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xfDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xfDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xfDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xfDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xfDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xfDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xfDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xfDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xfDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xfDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xfDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xfDajTwHFl627OaeSBAOT6Lf8bJgHAU4kdXy0IEuBCd7xfDajTwHFl627OaeSBAOT6Lf8bJg==');
+                    audio.play().catch(() => {});
+
+                    completeBtn.disabled = false;
+                    completeBtn.focus();
+                }
+            }, 1000);
+        }
+
+        // Update counter
+        function updateCounter(change) {
+            const item = appData.routines.morning.items[currentStep];
+            if (!item || item.type !== 'counter') return;
+
+            if (!item.current) item.current = 0;
+            item.current = Math.max(0, item.current + change);
+
+            Storage.save(appData);
+
+            const display = document.getElementById('counter-display');
+            display.textContent = item.current;
+
+            const completeBtn = document.getElementById('complete-btn');
+            completeBtn.disabled = item.current < item.target;
+        }
+
+        // Render current step
+        function render() {
+            const app = document.getElementById('app');
+            const item = appData.routines.morning.items[currentStep];
+            const progress = Routines.getMorningProgress(appData);
+
+            if (!item) {
+                nextStep();
+                return;
+            }
+
+            let content = '';
+
+            // Step-specific rendering
+            if (item.type === 'auto') {
+                // Auto-check items (like wake up)
+                content = `
+                    <div class="step-back">
+                        <button onclick="goBack()">← Back</button>
+                    </div>
+                    <div class="step-container">
+                        <div class="step-header">
+                            <div class="step-progress">Step ${currentStep + 1} of ${appData.routines.morning.items.length}</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress.percentage}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="step-content">
+                            <h1 class="step-title">${item.label}</h1>
+                            <p class="step-description">Good morning! Let's start your day.</p>
+                        </div>
+
+                        <div class="step-actions">
+                            <button class="btn btn-primary btn-large" onclick="completeStep()">Continue</button>
+                        </div>
+                    </div>
+                `;
+            } else if (item.type === 'timer') {
+                // Timer items - only stretch uses timer now, shower is manual
+                if (item.id === 'stretch') {
+                    const minutes = Math.floor(item.duration / 60);
+                    content = `
+                        <div class="step-back">
+                            <button onclick="goBack()">← Back</button>
+                        </div>
+                        <div class="step-container">
+                            <div class="step-header">
+                                <div class="step-progress">Step ${currentStep + 1} of ${appData.routines.morning.items.length}</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${progress.percentage}%"></div>
+                                </div>
+                            </div>
+
+                            <div class="step-content">
+                                <h1 class="step-title">${item.label}</h1>
+                                <div class="timer-display" id="timer-display">${Routines.formatTimer(item.duration)}</div>
+                                <p class="step-description">${minutes} minute${minutes !== 1 ? 's' : ''}</p>
+                            </div>
+
+                            <div class="step-actions">
+                                <button id="start-btn" class="btn btn-primary btn-large" onclick="startTimer(${item.duration})">Start Timer</button>
+                                <button id="complete-btn" class="btn btn-primary btn-large" onclick="completeStep()" disabled style="display: none;">Complete</button>
+                                <button class="btn btn-large" onclick="completeStep()">Skip</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Shower becomes manual
+                    content = `
+                        <div class="step-back">
+                            <button onclick="goBack()">← Back</button>
+                        </div>
+                        <div class="step-container">
+                            <div class="step-header">
+                                <div class="step-progress">Step ${currentStep + 1} of ${appData.routines.morning.items.length}</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${progress.percentage}%"></div>
+                                </div>
+                            </div>
+
+                            <div class="step-content">
+                                <h1 class="step-title">${item.label}</h1>
+                                <p class="step-description">Complete this task, then continue.</p>
+                            </div>
+
+                            <div class="step-actions">
+                                <button class="btn btn-primary btn-large" onclick="completeStep()">Done</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else if (item.type === 'counter') {
+                // Counter items
+                content = `
+                    <div class="step-back">
+                        <button onclick="goBack()">← Back</button>
+                    </div>
+                    <div class="step-container">
+                        <div class="step-header">
+                            <div class="step-progress">Step ${currentStep + 1} of ${appData.routines.morning.items.length}</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress.percentage}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="step-content">
+                            <h1 class="step-title">${item.label}</h1>
+                            <div class="counter-container">
+                                <div class="counter-display" id="counter-display">${item.current || 0}</div>
+                                <div class="counter-target">/ ${item.target}</div>
+                            </div>
+                            <div class="counter-controls">
+                                <button class="btn-counter btn-counter-large" onclick="updateCounter(1)">+1</button>
+                            </div>
+                        </div>
+
+                        <div class="step-actions">
+                            <button id="complete-btn" class="btn btn-primary btn-large" onclick="completeStep()">
+                                Complete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (item.type === 'redirect') {
+                // Redirect items (Bible study)
+                content = `
+                    <div class="step-back">
+                        <button onclick="goBack()">← Back</button>
+                    </div>
+                    <div class="step-container">
+                        <div class="step-header">
+                            <div class="step-progress">Step ${currentStep + 1} of ${appData.routines.morning.items.length}</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress.percentage}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="step-content">
+                            <h1 class="step-title">${item.label}</h1>
+                            <p class="step-description">Take time to read and reflect on Scripture.</p>
+                        </div>
+
+                        <div class="step-actions">
+                            <button class="btn btn-primary btn-large" onclick="window.location.href='bible-study.html?return=morning'">
+                                Start Bible Study
+                            </button>
+                            <button class="btn btn-large" onclick="completeStep()">
+                                Already Done
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (item.type === 'manual') {
+                // Manual check items
+                content = `
+                    <div class="step-back">
+                        <button onclick="goBack()">← Back</button>
+                    </div>
+                    <div class="step-container">
+                        <div class="step-header">
+                            <div class="step-progress">Step ${currentStep + 1} of ${appData.routines.morning.items.length}</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress.percentage}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="step-content">
+                            <h1 class="step-title">${item.label}</h1>
+                            <p class="step-description">Complete this task, then continue.</p>
+                        </div>
+
+                        <div class="step-actions">
+                            <button class="btn btn-primary btn-large" onclick="completeStep()">Done</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            app.innerHTML = content;
+
+            // Focus on primary button
+            setTimeout(() => {
+                const primaryBtn = document.querySelector('.btn-primary:not([disabled])');
+                if (primaryBtn) primaryBtn.focus();
+            }, 100);
+        }
+
+        // Initialize
+        window.onload = function() {
+            if (!checkAccess()) return;
+
+            autoCheckWakeUp();
+            currentStep = getCurrentStep();
+
+            if (currentStep >= appData.routines.morning.items.length) {
+                // Already complete
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            render();
+        };
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
+                const primaryBtn = document.querySelector('.btn-primary:not([disabled])');
+                if (primaryBtn) {
+                    primaryBtn.click();
+                }
+            }
+        });
+
+        // Cleanup timer on page unload
+        window.addEventListener('beforeunload', () => {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+        });
+    </script>
+</body>
+</html>

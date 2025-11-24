@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a0a0a">
+    <title>Evening Routine - deeper</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/step.css">
+</head>
+<body class="evening-mode">
+    <div id="app"></div>
+
+    <script src="scripts/storage.js"></script>
+    <script src="scripts/routines.js"></script>
+    <script>
+        let appData = Storage.load();
+        let currentStep = 0;
+
+        // Check if we should be on this page
+        function checkAccess() {
+            const mode = Routines.getCurrentMode();
+            if (mode === 'pre-morning') {
+                window.location.href = 'index.html';
+                return false;
+            }
+            if (mode === 'morning-required') {
+                window.location.href = 'morning-routine.html';
+                return false;
+            }
+            if (mode === 'daytime') {
+                window.location.href = 'dashboard.html';
+                return false;
+            }
+            if (mode === 'evening-complete') {
+                showEveningComplete();
+                return false;
+            }
+            return true;
+        }
+
+        // Go back to previous page
+        function goBack() {
+            // If we're on the evening complete screen, go to dashboard
+            const mode = Routines.getCurrentMode();
+            if (mode === 'evening-complete') {
+                window.location.href = 'dashboard.html';
+            } else {
+                window.history.back();
+            }
+        }
+
+        // Get current step from items
+        function getCurrentStep() {
+            const items = appData.routines.evening.items;
+            for (let i = 0; i < items.length; i++) {
+                if (!items[i].completed) {
+                    return i;
+                }
+            }
+            return items.length; // All complete
+        }
+
+        // Complete current step
+        function completeStep() {
+            const item = appData.routines.evening.items[currentStep];
+            if (!item) return;
+
+            item.completed = true;
+            Storage.save(appData);
+
+            // Move to next step
+            nextStep();
+        }
+
+        // Save text and move to next
+        function saveTextAndContinue() {
+            const textarea = document.getElementById('text-input');
+            const item = appData.routines.evening.items[currentStep];
+
+            if (item && textarea) {
+                item.value = textarea.value.trim();
+                item.completed = item.value.length > 0;
+                Storage.save(appData);
+            }
+
+            nextStep();
+        }
+
+        // Next step
+        function nextStep() {
+            currentStep = getCurrentStep();
+
+            if (currentStep >= appData.routines.evening.items.length) {
+                // All complete - finalize routine
+                Routines.finalizeRoutine(appData, 'evening');
+                Storage.save(appData);
+                showCompletion();
+            } else {
+                render();
+            }
+        }
+
+        // Show completion
+        function showCompletion() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="step-back">
+                    <button onclick="goBack()">← Back</button>
+                </div>
+                <div class="step-container">
+                    <div class="step-content">
+                        <div class="step-icon">✓</div>
+                        <h1 class="step-title">Evening Routine Complete!</h1>
+                        <p class="step-description">
+                            Great job today.<br><br>
+                            Now shut down your computer and go read, then sleep.<br><br>
+                            See you tomorrow morning.
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Show evening complete screen
+        function showEveningComplete() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="step-back">
+                    <button onclick="goBack()">← Back</button>
+                </div>
+                <div class="step-container">
+                    <div class="step-content">
+                        <div class="step-icon">✓</div>
+                        <h1 class="step-title">Evening routine completed</h1>
+                        <p class="step-description">
+                            Great job today.<br><br>
+                            Time to rest.<br><br>
+                            See you tomorrow morning.
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render current step
+        function render() {
+            const app = document.getElementById('app');
+            const item = appData.routines.evening.items[currentStep];
+            const progress = Routines.getEveningProgress(appData);
+
+            if (!item) {
+                nextStep();
+                return;
+            }
+
+            let content = '';
+
+            // Step-specific rendering
+            if (item.type === 'text') {
+                // Text input items
+                content = `
+                    <div class="step-back">
+                        <button onclick="goBack()">← Back</button>
+                    </div>
+                    <div class="step-container">
+                        <div class="step-header">
+                            <div class="step-progress">Step ${currentStep + 1} of ${appData.routines.evening.items.length}</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress.percentage}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="step-content">
+                            <h1 class="step-title">${item.label}</h1>
+                            <textarea
+                                id="text-input"
+                                class="evening-text-input"
+                                placeholder="Write your thoughts..."
+                                rows="6"
+                            >${item.value || ''}</textarea>
+                        </div>
+
+                        <div class="step-actions">
+                            <button class="btn btn-primary btn-large" onclick="saveTextAndContinue()">Continue</button>
+                        </div>
+                    </div>
+                `;
+            } else if (item.type === 'manual') {
+                // Manual check items
+                content = `
+                    <div class="step-back">
+                        <button onclick="goBack()">← Back</button>
+                    </div>
+                    <div class="step-container">
+                        <div class="step-header">
+                            <div class="step-progress">Step ${currentStep + 1} of ${appData.routines.evening.items.length}</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress.percentage}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="step-content">
+                            <h1 class="step-title">${item.label}</h1>
+                            <p class="step-description">Complete this task, then continue.</p>
+                        </div>
+
+                        <div class="step-actions">
+                            <button class="btn btn-primary btn-large" onclick="completeStep()">Done</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            app.innerHTML = content;
+
+            // Focus on input or button
+            setTimeout(() => {
+                const textInput = document.getElementById('text-input');
+                if (textInput) {
+                    textInput.focus();
+                } else {
+                    const primaryBtn = document.querySelector('.btn-primary');
+                    if (primaryBtn) primaryBtn.focus();
+                }
+            }, 100);
+        }
+
+        // Initialize
+        window.onload = function() {
+            if (!checkAccess()) return;
+
+            currentStep = getCurrentStep();
+
+            if (currentStep >= appData.routines.evening.items.length) {
+                // Already complete
+                showCompletion();
+                return;
+            }
+
+            render();
+        };
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Enter to continue (if not in textarea or with Ctrl)
+            if (e.key === 'Enter' && (e.ctrlKey || !document.activeElement || document.activeElement.tagName !== 'TEXTAREA')) {
+                const primaryBtn = document.querySelector('.btn-primary');
+                if (primaryBtn) {
+                    primaryBtn.click();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

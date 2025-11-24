@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0D1117">
+    <title>Dashboard - deeper</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+        .dashboard-container {
+            max-width: 2000px;
+            margin: 0 auto;
+            padding: var(--space-6) var(--space-8);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: var(--space-4);
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-size: var(--font-2xl);
+            font-weight: 700;
+            letter-spacing: 0.3em;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: minmax(200px, 1fr) minmax(600px, 3fr) minmax(200px, 1fr);
+            gap: var(--space-8);
+            flex: 1;
+            min-height: 0;
+            max-width: 100%;
+        }
+
+        .section {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .section-title {
+            font-size: var(--font-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-tertiary);
+            margin-bottom: var(--space-3);
+        }
+
+        /* Stats */
+        .stat-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            font-size: var(--font-base);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            font-size: var(--font-lg);
+        }
+
+        /* Habit Tracker */
+        .habit-section {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .habit-tracker {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .habit-row {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .habit-name {
+            font-size: var(--font-sm);
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 140px;
+            flex-shrink: 0;
+        }
+
+        .habit-cells {
+            display: flex;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .habit-cell {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            background: var(--border-subtle);
+            cursor: pointer;
+            transition: all 100ms ease;
+        }
+
+        .habit-cell:hover {
+            background: var(--border-primary);
+            transform: scale(1.15);
+        }
+
+        .habit-cell.completed {
+            background: var(--text-primary);
+        }
+
+        .habit-cell.today {
+            outline: 2px solid var(--text-tertiary);
+            outline-offset: 1px;
+        }
+
+        /* Actions */
+        .actions-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: var(--space-3);
+            background: transparent;
+            border: 1px solid var(--border-primary);
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: var(--font-sm);
+            text-align: left;
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+
+        .action-btn:hover {
+            color: var(--text-primary);
+            border-color: var(--text-primary);
+            background: rgba(201, 209, 217, 0.03);
+        }
+
+        .evening-btn {
+            border-color: var(--color-warning);
+            color: var(--color-warning);
+            border-width: 2px;
+        }
+
+        .evening-btn:hover {
+            background: rgba(210, 153, 34, 0.1);
+            border-color: var(--color-warning);
+        }
+
+        /* Sleep Graph */
+        .sleep-section {
+            margin-top: auto;
+            padding-top: var(--space-4);
+            flex-shrink: 0;
+        }
+
+        .sleep-input {
+            display: flex;
+            gap: var(--space-2);
+            margin-bottom: var(--space-3);
+            font-size: var(--font-xs);
+            align-items: center;
+        }
+
+        .sleep-input input {
+            width: 50px;
+            padding: 4px 6px;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: var(--font-xs);
+            transition: all 150ms ease;
+            text-align: center;
+        }
+
+        .sleep-input input:focus {
+            outline: none;
+            border-bottom-color: var(--text-primary);
+        }
+
+        .sleep-input input::placeholder {
+            color: var(--text-disabled);
+        }
+
+        .sleep-input input[type=number]::-webkit-inner-spin-button,
+        .sleep-input input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .sleep-input input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .sleep-input button {
+            padding: 4px 12px;
+            background: transparent;
+            border: 1px solid var(--border-primary);
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: var(--font-xs);
+            cursor: pointer;
+            transition: all 150ms ease;
+            pointer-events: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sleep-input button:hover {
+            color: var(--text-primary);
+            border-color: var(--text-primary);
+            background: rgba(201, 209, 217, 0.03);
+        }
+
+        .sleep-graph {
+            height: 120px;
+            position: relative;
+            border-left: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+            pointer-events: none;
+        }
+
+        @media (min-width: 1920px) {
+            .dashboard-container {
+                padding: var(--space-8) var(--space-8);
+            }
+
+            .logo {
+                font-size: var(--font-3xl);
+            }
+
+            .stat {
+                font-size: var(--font-lg);
+            }
+
+            .stat-value {
+                font-size: var(--font-xl);
+            }
+
+            .sleep-graph {
+                max-height: 200px;
+            }
+        }
+
+        @media (max-width: 1400px) {
+            .dashboard-grid {
+                grid-template-columns: minmax(180px, 1fr) minmax(500px, 3fr) minmax(180px, 1fr);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-container {
+                padding: var(--space-4);
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 160px 1fr 160px;
+                gap: var(--space-4);
+            }
+
+            .logo {
+                font-size: var(--font-xl);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script src="scripts/storage.js"></script>
+    <script src="scripts/routines.js"></script>
+    <script>
+        let appData = Storage.load();
+
+        // Initialize sleep data if not exists
+        if (!appData.sleepData) {
+            appData.sleepData = [];
+        }
+
+        function checkAccess() {
+            const mode = Routines.getCurrentMode();
+            if (mode === 'pre-morning') {
+                window.location.href = 'index.html';
+                return false;
+            }
+            if (mode === 'morning-required') {
+                window.location.href = 'morning-routine.html';
+                return false;
+            }
+            // Allow dashboard during evening-required and evening-complete
+            // Users can view dashboard even after completing evening routine
+            return true;
+        }
+
+        function calculateDaysToShow() {
+            // Calculate based on available width
+            const centerColumn = document.querySelector('.habit-section');
+            if (!centerColumn) {
+                // Fallback: estimate based on window width
+                const windowWidth = window.innerWidth;
+                if (windowWidth >= 1920) return 50;
+                if (windowWidth >= 1600) return 40;
+                if (windowWidth >= 1400) return 30;
+                return 21;
+            }
+
+            const width = centerColumn.offsetWidth;
+            const nameWidth = 140;
+            const cellSize = 16;
+            const gap = 4;
+            const padding = 60;
+
+            const availableWidth = width - nameWidth - padding;
+            const maxDays = Math.floor(availableWidth / (cellSize + gap));
+
+            // Clamp between 14 and 60 days
+            return Math.min(60, Math.max(14, maxDays));
+        }
+
+        function getLastNDays(n) {
+            const days = [];
+            const today = new Date();
+            for (let i = n - 1; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                days.push({
+                    date: date.toISOString().split('T')[0],
+                    isToday: i === 0
+                });
+            }
+            return days;
+        }
+
+        function getLastNDaysSimple(n) {
+            const days = [];
+            const today = new Date();
+            for (let i = n - 1; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                days.push(date.toISOString().split('T')[0]);
+            }
+            return days;
+        }
+
+        function toggleHabit(habitId, date) {
+            const habit = appData.habits.find(h => h.id === habitId);
+            if (!habit) return;
+
+            const index = habit.dates.indexOf(date);
+            if (index > -1) {
+                habit.dates.splice(index, 1);
+            } else {
+                habit.dates.push(date);
+                habit.dates.sort();
+            }
+
+            Storage.save(appData);
+            render();
+        }
+
+        function logSleep() {
+            const hoursInput = document.getElementById('sleep-hours');
+            const qualityInput = document.getElementById('sleep-quality');
+
+            if (!hoursInput || !qualityInput) {
+                alert('Error: Sleep inputs not found');
+                return;
+            }
+
+            const hours = parseFloat(hoursInput.value);
+            const quality = parseInt(qualityInput.value);
+
+            // Validate inputs
+            if (!hoursInput.value || isNaN(hours) || hours <= 0 || hours > 12) {
+                alert('Please enter valid sleep hours (0.5-12)');
+                return;
+            }
+
+            if (!qualityInput.value || isNaN(quality) || quality < 1 || quality > 10) {
+                alert('Please enter valid quality (1-10)');
+                return;
+            }
+
+            const today = Storage.getTodayString();
+            const existing = appData.sleepData.findIndex(s => s.date === today);
+
+            if (existing > -1) {
+                appData.sleepData[existing] = { date: today, hours, quality };
+            } else {
+                appData.sleepData.push({ date: today, hours, quality });
+            }
+
+            // Keep only last 90 days
+            appData.sleepData.sort((a, b) => a.date.localeCompare(b.date));
+            if (appData.sleepData.length > 90) {
+                appData.sleepData = appData.sleepData.slice(-90);
+            }
+
+            Storage.save(appData);
+
+            // Update the graph and re-render to show the new value
+            render();
+        }
+
+        function renderSleepGraph(numDays) {
+            const days = getLastNDaysSimple(numDays);
+            const sleepMap = {};
+            appData.sleepData.forEach(s => {
+                sleepMap[s.date] = s;
+            });
+
+            const maxHours = 10;
+            const points = days.map((date, i) => {
+                const sleep = sleepMap[date];
+                if (!sleep) return null;
+                const x = (i / (numDays - 1)) * 100;
+                const yHours = (sleep.hours / maxHours) * 100;
+                const yQuality = (sleep.quality / 10) * 100;
+                return { x, yHours, yQuality, sleep };
+            }).filter(p => p);
+
+            if (points.length === 0) return '<svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></svg>';
+
+            let hoursPath = 'M';
+            let qualityPath = 'M';
+
+            points.forEach((p, i) => {
+                hoursPath += `${i === 0 ? '' : ' L'}${p.x} ${100 - p.yHours}`;
+                qualityPath += `${i === 0 ? '' : ' L'}${p.x} ${100 - p.yQuality}`;
+            });
+
+            return `
+                <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                    <path d="${hoursPath}" stroke="var(--text-primary)" stroke-width="2" fill="none" />
+                    <path d="${qualityPath}" stroke="var(--text-tertiary)" stroke-width="1.5" fill="none" stroke-dasharray="3,3" />
+                </svg>
+            `;
+        }
+
+        function openBibleStudy() {
+            window.location.href = 'bible-study.html';
+        }
+
+        function openJournal() {
+            window.location.href = 'journal.html';
+        }
+
+        function startEveningRoutine() {
+            window.location.href = 'evening-routine.html';
+        }
+
+        function openSettings() {
+            const action = prompt('Settings: Type\n1 = Times\n2 = Edit Habits\n3 = Export\n4 = Import\n5 = Reset All Data', '1');
+
+            if (action === '1') {
+                const morning = prompt('Morning routine time (HH:MM)', appData.preferences.morningTime);
+                if (morning) {
+                    appData.preferences.morningTime = morning;
+                    Storage.save(appData);
+                }
+                const evening = prompt('Evening routine time (HH:MM)', appData.preferences.eveningTime);
+                if (evening) {
+                    appData.preferences.eveningTime = evening;
+                    Storage.save(appData);
+                }
+            } else if (action === '2') {
+                openHabitEditor();
+            } else if (action === '3') {
+                exportData();
+            } else if (action === '4') {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            try {
+                                appData = JSON.parse(ev.target.result);
+                                Storage.save(appData);
+                                render();
+                                alert('Data imported successfully');
+                            } catch (err) {
+                                alert('Failed to import: ' + err.message);
+                            }
+                        };
+                        reader.readAsText(file);
+                    }
+                };
+                input.click();
+            } else if (action === '5') {
+                Storage.reset();
+            }
+        }
+
+        function openHabitEditor() {
+            const numDays = calculateDaysToShow();
+            const days = getLastNDays(numDays);
+            const habitList = appData.habits.map((habit, idx) => {
+                return `${idx + 1}. ${habit.name}`;
+            }).join('\n');
+
+            const habitIdx = prompt(`Select habit to edit:\n${habitList}\n\nEnter number:`, '1');
+            if (!habitIdx) return;
+
+            const habit = appData.habits[parseInt(habitIdx) - 1];
+            if (!habit) {
+                alert('Invalid habit number');
+                return;
+            }
+
+            editHabitDays(habit, days);
+        }
+
+        function editHabitDays(habit, days) {
+            const dayList = days.map((day, idx) => {
+                const completed = habit.dates.includes(day.date);
+                return `${idx + 1}. ${day.date} ${completed ? '[X]' : '[ ]'}`;
+            }).join('\n');
+
+            const action = prompt(`${habit.name}\n\n${dayList}\n\nEnter day number to toggle (or 0 to finish):`, '0');
+
+            if (!action || action === '0') {
+                Storage.save(appData);
+                render();
+                return;
+            }
+
+            const dayIdx = parseInt(action) - 1;
+            if (dayIdx >= 0 && dayIdx < days.length) {
+                toggleHabit(habit.id, days[dayIdx].date);
+                editHabitDays(habit, days); // Recursive call
+            } else {
+                alert('Invalid day number');
+                editHabitDays(habit, days);
+            }
+        }
+
+        function exportData() {
+            if (Storage.exportData(appData)) {
+                alert('Data exported successfully');
+            }
+        }
+
+        let lastNumDays = 0;
+
+        function render() {
+            const app = document.getElementById('app');
+            const today = Storage.getTodayString();
+
+            // Start with initial estimate
+            let numDays = calculateDaysToShow();
+            let days = getLastNDays(numDays);
+
+            const morningComplete = Storage.isRoutineCompletedToday(appData, 'morning');
+            const eveningComplete = Storage.isRoutineCompletedToday(appData, 'evening');
+            const todayStudyTime = Storage.getTodayStudyTime(appData);
+            const weekStudyTime = Storage.getStudyTimeForRange(
+                appData,
+                new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                today
+            );
+
+            const mode = Routines.getCurrentMode();
+            const isEvening = mode === 'evening-required';
+
+            const todaySleep = appData.sleepData.find(s => s.date === today);
+
+            app.innerHTML = `
+                <div class="dashboard-container">
+                    <div class="header">
+                        <div class="logo">DEEPER</div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <!-- LEFT: Stats -->
+                        <div class="section">
+                            <h2 class="section-title">Stats</h2>
+                            <div class="stat-list">
+                                <div class="stat">
+                                    <span class="stat-label">Morning</span>
+                                    <span class="stat-value">${morningComplete ? '✓' : '○'}</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Evening</span>
+                                    <span class="stat-value">${eveningComplete ? '✓' : '○'}</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Study</span>
+                                    <span class="stat-value">${todayStudyTime}m</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Week</span>
+                                    <span class="stat-value">${weekStudyTime}m</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">M Streak</span>
+                                    <span class="stat-value">${Storage.getHabitStreak(appData, 'morning-routine')}</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">E Streak</span>
+                                    <span class="stat-value">${Storage.getHabitStreak(appData, 'evening-routine')}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CENTER: Habit Tracker -->
+                        <div class="section habit-section">
+                            <h2 class="section-title">Habits (${numDays}d)</h2>
+                            <div class="habit-tracker">
+                                ${appData.habits.map(habit => `
+                                    <div class="habit-row">
+                                        <div class="habit-name">${habit.name}</div>
+                                        <div class="habit-cells">
+                                            ${days.map(day => `
+                                                <div
+                                                    class="habit-cell ${habit.dates.includes(day.date) ? 'completed' : ''} ${day.isToday ? 'today' : ''}"
+                                                    onclick="toggleHabit('${habit.id}', '${day.date}')"
+                                                ></div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <!-- Sleep Tracker -->
+                            <div class="sleep-section">
+                                <h2 class="section-title">Sleep (${numDays}d)</h2>
+                                <div class="sleep-input">
+                                    <input type="number" id="sleep-hours" placeholder="hrs" step="0.5" min="0" max="12" value="${todaySleep ? todaySleep.hours : ''}">
+                                    <input type="number" id="sleep-quality" placeholder="q 1-10" min="1" max="10" value="${todaySleep ? todaySleep.quality : ''}">
+                                    <button onclick="logSleep()">Log</button>
+                                </div>
+                                <div class="sleep-graph">
+                                    ${renderSleepGraph(numDays)}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT: Actions -->
+                        <div class="section">
+                            <h2 class="section-title">Actions</h2>
+                            <div class="actions-list">
+                                ${isEvening ? `
+                                    <button class="action-btn evening-btn" onclick="startEveningRoutine()">Evening Routine</button>
+                                ` : ''}
+                                <button class="action-btn" onclick="openBibleStudy()">Bible Study</button>
+                                <button class="action-btn" onclick="openJournal()">Journal</button>
+                                <button class="action-btn" onclick="openSettings()">Settings</button>
+                                <button class="action-btn" onclick="exportData()">Export</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // After render, recalculate days if needed (only once)
+            if (lastNumDays !== numDays) {
+                lastNumDays = numDays;
+                setTimeout(() => {
+                    const recalculated = calculateDaysToShow();
+                    if (recalculated !== numDays && Math.abs(recalculated - numDays) > 2) {
+                        render();
+                    }
+                }, 50);
+            }
+        }
+
+        window.onload = function() {
+            if (!checkAccess()) return;
+            render();
+        };
+
+        // Re-render on window resize (debounced)
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                render();
+            }, 300);
+        });
+
+        setInterval(() => {
+            const mode = Routines.getCurrentMode();
+            const wasEvening = document.querySelector('.evening-btn');
+            const isEvening = mode === 'evening-required';
+
+            // Only re-render if evening button state changed
+            if ((wasEvening && !isEvening) || (!wasEvening && isEvening)) {
+                render();
+            }
+        }, 60000);
+    </script>
+</body>
+</html>

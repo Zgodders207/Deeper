@@ -1,0 +1,358 @@
+/* ============================================
+   DESIGN SYSTEM TOKENS (8-POINT GRID)
+   ============================================ */
+:root {
+    /* Spacing scale (8px base) */
+    --space-1: 8px;
+    --space-2: 16px;
+    --space-3: 24px;
+    --space-4: 32px;
+    --space-6: 48px;
+    --space-8: 64px;
+    --space-12: 96px;
+
+    /* Typography scale (1.125 modular scale) */
+    --font-xs: 12px;
+    --font-sm: 14px;
+    --font-base: 16px;
+    --font-lg: 18px;
+    --font-xl: 20px;
+    --font-2xl: 24px;
+    --font-3xl: 28px;
+    --font-4xl: 32px;
+
+    /* Colors (WCAG AAA compliant) */
+    --bg-primary: #0D1117;
+    --bg-elevated: #161B22;
+    --text-primary: #C9D1D9;
+    --text-secondary: rgba(201, 209, 217, 0.85);
+    --text-tertiary: rgba(201, 209, 217, 0.64);
+    --text-disabled: rgba(201, 209, 217, 0.38);
+    --border-primary: #30363D;
+    --border-subtle: #21262D;
+
+    /* Accent colors */
+    --color-warning: #D29922;
+    --color-error: #F85149;
+    --color-info: #58A6FF;
+
+    /* Font */
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', Monaco, Consolas, monospace;
+}
+
+/* Evening mode color overrides */
+.evening-mode {
+    --bg-primary: #1a0a0a;
+    --bg-elevated: #2a1515;
+    --text-primary: #ffcccc;
+    --text-secondary: rgba(255, 204, 204, 0.85);
+    --text-tertiary: rgba(255, 204, 204, 0.64);
+    --border-primary: #4a2525;
+    --border-subtle: #3a1a1a;
+}
+
+/* ============================================
+   RESET & BASE
+   ============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-mono);
+    font-size: var(--font-base);
+    line-height: 1.6;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   LAYOUT
+   ============================================ */
+.container {
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: var(--space-4) var(--space-6);
+    min-height: 100vh;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.btn {
+    width: 100%;
+    min-height: 52px;
+    padding: var(--space-2) var(--space-3);
+    margin-bottom: var(--space-2);
+    background: transparent;
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: var(--font-sm);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 150ms ease;
+    text-align: center;
+    border-radius: 2px;
+}
+
+.btn:hover {
+    background: var(--bg-elevated);
+    border-color: var(--text-tertiary);
+}
+
+.btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(201, 209, 217, 0.3);
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn-primary {
+    border-color: var(--text-primary);
+}
+
+.btn-primary:hover {
+    background: var(--text-primary);
+    color: var(--bg-primary);
+}
+
+.btn-icon {
+    min-width: 48px;
+    min-height: 48px;
+    width: 48px;
+    height: 48px;
+    padding: var(--space-1);
+    background: transparent;
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: var(--font-xl);
+    cursor: pointer;
+    transition: all 150ms ease;
+    border-radius: 2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon:hover {
+    background: var(--bg-elevated);
+    border-color: var(--text-tertiary);
+}
+
+.btn-icon:active {
+    transform: scale(0.95);
+}
+
+/* ============================================
+   MODALS
+   ============================================ */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(13, 17, 23, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--space-4);
+    animation: fadeIn 200ms ease-out;
+}
+
+.modal-content {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    padding: var(--space-6);
+    max-width: 600px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    border-radius: 4px;
+    animation: slideIn 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-header {
+    font-size: var(--font-2xl);
+    font-weight: 700;
+    margin-bottom: var(--space-4);
+    color: var(--text-primary);
+}
+
+.modal-actions {
+    display: flex;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+}
+
+.modal-actions .btn {
+    margin-bottom: 0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    padding: var(--space-2);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: var(--font-base);
+    border-radius: 2px;
+    transition: all 150ms ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--text-tertiary);
+    box-shadow: 0 0 0 3px rgba(201, 209, 217, 0.1);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.text-input {
+    font-size: var(--font-sm);
+    line-height: 1.6;
+}
+
+/* ============================================
+   PROGRESS BAR
+   ============================================ */
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--border-subtle);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: var(--space-2);
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--text-primary);
+    transition: width 300ms ease;
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-primary);
+    border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-tertiary);
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+.centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.completion-screen {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.completion-icon {
+    font-size: 72px;
+    margin-bottom: var(--space-4);
+    opacity: 0.8;
+}
+
+.completion-title {
+    font-size: var(--font-4xl);
+    font-weight: 700;
+    margin-bottom: var(--space-3);
+    line-height: 1.2;
+}
+
+.completion-body {
+    font-size: var(--font-lg);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--space-6);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 640px) {
+    .container {
+        padding: var(--space-3) var(--space-2);
+    }
+
+    .modal-content {
+        padding: var(--space-4);
+    }
+
+    .completion-title {
+        font-size: var(--font-2xl);
+    }
+
+    .completion-body {
+        font-size: var(--font-base);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
